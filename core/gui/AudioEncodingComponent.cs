@@ -36,6 +36,7 @@ namespace MeGUI
 {
     public partial class AudioEncodingComponent : UserControl
     {
+        public List<AudioEncodingTab> Tabs { get { return tabs; } }
         private List<AudioEncodingTab> tabs = new List<AudioEncodingTab>();
 
         #region init
@@ -165,6 +166,16 @@ namespace MeGUI
                 removeTrackToolStripMenuItem.Enabled = false;
             else
                 removeTrackToolStripMenuItem.Enabled = true;
+        }
+
+        public void SelectProfile(AudioEncodingTab tab, string fqName)
+        {
+            tab.SelectProfile(fqName);
+        }
+
+        public void QueueJob(AudioEncodingTab tab)
+        {
+            tab.queueAudioButton_Click(tab, EventArgs.Empty);
         }
     }
 }

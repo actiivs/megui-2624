@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
 using System.Xml;
@@ -965,6 +966,7 @@ namespace MeGUI
             PackageSystem.MuxerProviders.Register(new MP4BoxMuxerProvider());
             PackageSystem.Tools.Register(new MeGUI.packages.tools.cutter.CutterTool());
             PackageSystem.Tools.Register(new AviSynthWindowTool());
+            PackageSystem.Tools.Register(new CustomAviSynthWindowTool());
             PackageSystem.Tools.Register(new AutoEncodeTool());
             PackageSystem.Tools.Register(new CQMEditorTool());
             PackageSystem.Tools.Register(new CalculatorTool());
@@ -1420,6 +1422,25 @@ namespace MeGUI
         {
             if (this.WindowState != FormWindowState.Minimized && this.Visible == true)
                 settings.MainFormSize = this.ClientSize;
+        }
+
+        public void QueueHdSource(object sender, CustomAviSynthWindow.QueueHdSourceEventArgs e)
+        {
+            videoEncodingComponent1.SelectProfile("x264: Medium - 1600k");
+            videoEncodingComponent1.QueueJob();
+            
+            audioEncodingComponent1.openAudioFile(e.SourceFilename);
+            if (audioEncodingComponent1.Tabs.Any())
+            {
+                audioEncodingComponent1.SelectProfile(audioEncodingComponent1.Tabs[0], "QAAC: 96Kbps");
+                audioEncodingComponent1.QueueJob(audioEncodingComponent1.Tabs[0]);
+                
+                MuxWindow mw = new MuxWindow(PackageSystem.MuxerProviders["mkvmerge"], this);
+                var videoOutput = string.Format("{0}.264", e.FilenameWithoutExtension);
+                var audioOutput = audioEncodingComponent1.Tabs[0].AudioOutput;
+                var output = string.Format("{0}.mkv", e.FilenameWithoutExtension);
+                mw.QueueMuxJob(videoOutput, audioOutput, output, e.Fps);
+            }
         }
     }
 }

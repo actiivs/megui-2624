@@ -549,6 +549,11 @@ namespace MeGUI.core.gui
             }
         }
 
+        public ThreadState RenderThreadState
+        {
+            get { return renderThread.ThreadState; }
+        }
+
         /// <summary> 
         /// Release Ressources.
         /// </summary>

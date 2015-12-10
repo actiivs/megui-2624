@@ -21,6 +21,7 @@
 using System;
 using System.ComponentModel;
 using System.Drawing;
+using System.Threading;
 using System.Windows.Forms;
 
 using MeGUI.core.gui;
@@ -88,6 +89,14 @@ namespace MeGUI
             setZoomButtons();
             sizeLock = false;
 		}
+
+        public bool CanClose
+        {
+            get
+            {
+                return videoPreview.RenderThreadState == ThreadState.WaitSleepJoin || videoPreview.RenderThreadState == ThreadState.Stopped;
+            }
+        }
 
         public bool AllowClose
         {

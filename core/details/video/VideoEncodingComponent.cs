@@ -528,5 +528,15 @@ namespace MeGUI
         {
             VideoInput_DoubleClick(null, null);
         }
+
+        public void SelectProfile(string fqname)
+        {
+            videoProfile.SelectProfile(fqname);
+        }
+
+        public void QueueJob()
+        {
+            queueVideoButton_Click(this, EventArgs.Empty);
+        }
     }
 }

@@ -63,7 +63,7 @@ namespace MeGUI.core.gui
             get { return audioInput.Filename; }
             set { audioInput.Filename = value; }
         }
-        private string AudioOutput
+        public string AudioOutput
         {
             get { return audioOutput.Filename; }
             set { audioOutput.Filename = value; }
@@ -174,7 +174,7 @@ namespace MeGUI.core.gui
             Reset();
         }
 
-        private void queueAudioButton_Click(object sender, EventArgs e)
+        public void queueAudioButton_Click(object sender, EventArgs e)
         {
             string settingsError = verifyAudioSettings();
             if (settingsError != null)
@@ -257,5 +257,9 @@ namespace MeGUI.core.gui
             Util.ChangeItemsKeepingSelectedSame(audioContainer, AudioEncoderProvider.GetSupportedOutput(lastCodec));
         }
 
+        public void SelectProfile(string fqName)
+        {
+            audioProfile.SelectProfile(fqName);
+        }
     }
 }

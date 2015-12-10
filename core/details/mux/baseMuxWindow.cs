@@ -24,10 +24,12 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.IO;
+using System.Text;
 using System.Windows.Forms;
 
 using MeGUI.core.details;
 using MeGUI.core.details.mux;
+using MeGUI.core.gui;
 using MeGUI.core.util;
 
 namespace MeGUI
@@ -162,6 +164,18 @@ namespace MeGUI
                     return;
             }
             AudioAddTrack();
+
+            if (string.IsNullOrEmpty(vInput.Filename))
+            {
+                vInput.setFilename(audioTracks[0].input.Filename.Replace(".m4a", ".264"));
+                fps.Value = FPS.Parse("29.970").fps;
+                string fileNameNoPath = Path.GetFileName(vInput.Filename);
+
+                var root = Path.GetPathRoot(vInput.Filename);
+                output.Filename = Path.Combine(Path.Combine(root, "Upload"), GetNormalizedOutputName(fileNameNoPath));
+                output.Filename = output.Filename.Replace(".mkv", "");
+                ChangeOutputExtension();
+            }
         }
         protected virtual void checkIO()
         {
@@ -388,6 +402,25 @@ namespace MeGUI
                 chaptersGroupbox.Enabled = true;
             else
                 chaptersGroupbox.Enabled = false;
+        }
+
+        protected string GetNormalizedOutputName(string oldName)
+        {
+            var replacements = new Dictionary<string, string>
+            {
+                {"[FHD]", ""},
+                {"[HD]", ""},
+                {".1080p", ""},
+                {".720p", ""},
+                {"-", ""},
+            };
+
+            var ret = new StringBuilder(oldName);
+            foreach (var replacement in replacements)
+            {
+                ret = ret.Replace(replacement.Key, replacement.Value);
+            }
+            return ret.ToString().Trim();
         }
     }
 }

@@ -25,6 +25,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
@@ -236,6 +237,18 @@ namespace MeGUI
         {
             checkIO();
             fileUpdated();
+        }
+
+        public void QueueMuxJob(string videoFilename, string audioFilename, string outputFilename, decimal framerate)
+        {
+            vInput.Filename = videoFilename;
+            output.Filename = GetNormalizedOutputName(outputFilename);
+            audioTracks.First().input.Filename = audioFilename;
+            fps.Value = framerate;
+
+            MuxJob job = this.Job;
+            mainForm.Jobs.addJobsToQueue(job);
+            this.Close();
         }
     }
 }

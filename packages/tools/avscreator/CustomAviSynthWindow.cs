@@ -1,6 +1,6 @@
 // ****************************************************************************
 // 
-// Copyright (C) 2005-2015 Doom9 & al
+// Copyright (C) 2005-2014 Doom9 & al
 // 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -22,7 +22,9 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 
 using MeGUI.core.util;
@@ -33,7 +35,7 @@ namespace MeGUI
     /// <summary>
 	/// Summary description for AviSynthWindow.
 	/// </summary>
-	public partial class AviSynthWindow : Form
+	public partial class CustomAviSynthWindow : Form
 	{
 		#region variable declaration
         private string originalScript;
@@ -55,8 +57,25 @@ namespace MeGUI
         private LogItem _oLog;
 		#endregion
 
+        public event EventHandler<QueueHdSourceEventArgs> QueueHdSource;
+        public class QueueHdSourceEventArgs : EventArgs
+        {
+            public decimal Fps { get; set; }
+            public string FilenameWithoutExtension { get; set; }
+            public string SourceFilename { get; set; }
+        }
+
+        private bool isHdSource;
+        private readonly List<string> hdSourceKeyword = new List<string>
+        {
+            "[FHD]",
+            "[HD]",
+            ".1080p",
+            ".720p",
+        };
+
 		#region construction/deconstruction
-        public AviSynthWindow(MainForm mainForm)
+        public CustomAviSynthWindow(MainForm mainForm)
         {
             scriptRefresh--;
             eventsOn = false;
@@ -121,7 +140,7 @@ namespace MeGUI
 
             eventsOn = true;
             updateEverything(true, true, resize.Checked);
-		}
+        }
 
         void ProfileChanged(object sender, EventArgs e)
         {
@@ -133,14 +152,14 @@ namespace MeGUI
 		/// then opens a preview window with the video given as parameter
 		/// </summary>
 		/// <param name="videoInput">the DGIndex script to be loaded</param>
-		public AviSynthWindow(MainForm mainForm, string videoInput) : this(mainForm)
+		public CustomAviSynthWindow(MainForm mainForm, string videoInput) : this(mainForm)
 		{
             scriptRefresh--;
             openVideoSource(videoInput, null);
             updateEverything(true, true, resize.Checked);
 		}
 
-        public AviSynthWindow(MainForm mainForm, string videoInput, string indexFile)
+        public CustomAviSynthWindow(MainForm mainForm, string videoInput, string indexFile)
             : this(mainForm)
         {
             scriptRefresh--;
@@ -162,11 +181,28 @@ namespace MeGUI
         #region buttons
         private void input_FileSelected(FileBar sender, FileBarEventArgs args)
         {
+            if (hdSourceKeyword.Any(keyword => input.Filename.Contains(keyword)))
+            {
+                isHdSource = true;
+                avsProfile.SelectProfile("AviSynth: *scratchpad*");
+            }
+
             scriptRefresh--;
             openVideoSource(input.Filename, null);
             updateEverything(true, true, resize.Checked);
-		}
 
+            if (isHdSource)
+            {
+                while (!player.CanClose)
+                {
+                    Application.DoEvents();
+                    Thread.Sleep(100);
+                }
+                player.Close();
+                saveButton_Click(saveButton, EventArgs.Empty);
+            }
+        }
+        
 		private void openDLLButton_Click(object sender, System.EventArgs e)
 		{
             this.openFilterDialog.InitialDirectory = MainForm.Instance.Settings.AvisynthPluginsPath;
@@ -206,16 +242,44 @@ namespace MeGUI
         private void saveButton_Click(object sender, System.EventArgs e)
 		{
             string fileName = videoOutput.Filename;
+            var sourceFilename = input.Filename;
             writeScript(fileName);
-			if (onSaveLoadScript.Checked)
+
+            if (onSaveLoadScript.Checked)
 			{
                 if(player != null)
 				    player.Close();
 				this.Close();
-                OpenScript(fileName, null);
+
+			    if (!sourceFilename.Contains("D:\\") && File.Exists(sourceFilename))
+			    {
+                    if (sourceFilename.Contains(".mkv"))
+			            File.Move(sourceFilename, sourceFilename.Replace(".mkv", ""));
+                    else if (sourceFilename.Contains(".mp4"))
+                        File.Move(sourceFilename, sourceFilename.Replace(".mp4", ""));
+                    else if (sourceFilename.Contains(".wmv"))
+                        File.Move(sourceFilename, sourceFilename.Replace(".wmv", ""));
+                    else if (sourceFilename.Contains(".avi"))
+                        File.Move(sourceFilename, sourceFilename.Replace(".avi", ""));
+			    }
+			    else
+			    {
+                    OpenScript(fileName, null);
+
+                    if (isHdSource && QueueHdSource != null)
+                    {
+                        QueueHdSource(this, new QueueHdSourceEventArgs
+                        {
+                            Fps = fpsBox.Value,
+                            SourceFilename = sourceFilename,
+                            FilenameWithoutExtension = fileName.Replace(".avs", string.Empty),
+                        });
+                    }
+			    }
             }
 		}
-		#endregion
+
+        #endregion
 
 		#region script generation
 		private string generateScript()
@@ -300,7 +364,18 @@ namespace MeGUI
 
             string oldScript = avisynthScript.Text;
             avisynthScript.Text = this.generateScript();
-            if (!oldScript.Equals(avisynthScript.Text))
+
+            if (file != null && videoOutput != null && isHdSource)
+		    {
+		        if ((int)file.VideoInfo.Width == 1920 && (int)file.VideoInfo.Height == 1080)
+		        {
+                    avisynthScript.Text = avisynthScript.Text.Replace("#resize", "LanczosResize(1280,720) # Lanczos (Sharp)");
+		        }
+		        var trim = string.Format("trim(0,{0})", file.VideoInfo.FrameCount - 4);
+		        avisynthScript.Text = avisynthScript.Text.Replace("#deinterlace", string.Format("#deinterlace{0}{1}", Environment.NewLine, trim));
+		    }
+            
+		    if (!oldScript.Equals(avisynthScript.Text))
                 chAutoPreview_CheckedChanged(null, null);
 		}
 		#endregion
@@ -343,11 +418,9 @@ namespace MeGUI
                     sourceType = PossibleSources.d2v;
                     openVideo(videoInput);
                     break;
+
                 case ".dgi":
-                    if (FileIndexerWindow.isDGMFile(videoInput))
-                        sourceType = PossibleSources.dgm;
-                    else
-                        sourceType = PossibleSources.dgi;
+                    sourceType = PossibleSources.dgi;
                     openVideo(videoInput); 
                     break;
                 case ".ffindex":
@@ -366,38 +439,20 @@ namespace MeGUI
                     openVDubFrameServer(videoInput);
                     break;
                 default:
-                    if (File.Exists(videoInput + ".ffindex"))
+                    if (System.IO.File.Exists(videoInput + ".ffindex"))
                     {
                         sourceType = PossibleSources.ffindex;
                         openVideo(videoInput);
                     }
-                    if (File.Exists(videoInput + ".lwi"))
+                    if (System.IO.File.Exists(videoInput + ".lwi"))
                     {
                         sourceType = PossibleSources.lsmash;
                         openVideo(videoInput);
                     }
                     else
                     {
-                        int iResult = mainForm.DialogManager.AVSCreatorOpen(videoInput);
-                        switch (iResult)
-                        {
-                            case 0:
-                                OneClickWindow ocmt = new OneClickWindow();
-                                ocmt.setInput(videoInput);
-                                ocmt.Show();
-                                this.Close();
-                                break;
-                            case 1:
-                                FileIndexerWindow fileIndexer = new FileIndexerWindow(mainForm);
-                                fileIndexer.setConfig(videoInput, null, 2, true, true, true, false);
-                                fileIndexer.Show();
-                                this.Close();
-                                break;
-                            default:
-                                sourceType = PossibleSources.directShow;
-                                openDirectShow(videoInput);
-                                break;
-                        }
+                        sourceType = PossibleSources.directShow;
+                        openDirectShow(videoInput);
                     }
                     break;
             }
@@ -418,7 +473,7 @@ namespace MeGUI
 				    sw.Close();
                 }
 			}
-			catch (Exception i)
+			catch (IOException i)
 			{
 				MessageBox.Show("An error occurred when trying to save the AviSynth script:\r\n" + i.Message);
 			}
@@ -510,23 +565,6 @@ namespace MeGUI
                     this.cbNvDeInt.SelectedIndex = 0;
                     this.tabSources.SelectedTab = tabPage3;
                     break;
-                case PossibleSources.dgm:
-                    this.mpeg2Deblocking.Checked = false;
-                    this.mpeg2Deblocking.Enabled = false;
-                    this.colourCorrect.Enabled = false;
-                    this.colourCorrect.Checked = false;
-                    this.flipVertical.Enabled = false;
-                    this.flipVertical.Checked = false;
-                    this.dss2.Enabled = false;
-                    this.fpsBox.Enabled = false;
-                    this.cbNvDeInt.Enabled = false;
-                    this.nvDeInt.Enabled = false;
-                    this.nvDeInt.Checked = false;
-                    this.nvResize.Enabled = false;
-                    this.nvResize.Checked = false;
-                    this.cbNvDeInt.SelectedIndex = 0;
-                    this.tabSources.SelectedTab = tabPage3;
-                    break;
             }
         }
 
@@ -544,7 +582,7 @@ namespace MeGUI
                     case PossibleSources.dgi:
                         if (line.Contains("DGMPGIndexFileNV")) flag = true;
                         if (line.Contains("DGAVCIndexFileNV")) flag = true;
-                        if (line.Contains("DGVC1IndexFileNV")) flag = true;
+                        if (line.Contains("DGVC1IndexFileNV")) flag = true; 
                         break; 
                 }
             }
@@ -618,7 +656,7 @@ namespace MeGUI
         /// <param name="fileName">Input video file</param>     
         private void openDirectShow(string fileName)
         {
-            if (!File.Exists(fileName))
+            if (!System.IO.File.Exists(fileName))
             {
                 MessageBox.Show(fileName + " could not be found", "File Not Found", MessageBoxButtons.OK);
                 return;
@@ -672,7 +710,7 @@ namespace MeGUI
         /// <param name="fileName">Name of the .vdr file</param>
         private void openVDubFrameServer(string fileName)
         {
-            if (!File.Exists(fileName))
+            if (!System.IO.File.Exists(fileName))
             {
                 MessageBox.Show(fileName + " could not be found","File Not Found",MessageBoxButtons.OK);
                 return;
@@ -686,7 +724,7 @@ namespace MeGUI
         /// <param name="fileName">Name of the avs script</param>
         private void openAVSScript(string fileName)
         {
-            if (!File.Exists(fileName))
+            if (!System.IO.File.Exists(fileName))
             {
                 MessageBox.Show(fileName + " could not be found", "File Not Found", MessageBoxButtons.OK);
                 return;
@@ -777,7 +815,7 @@ namespace MeGUI
                     verticalResolution.Maximum = file.VideoInfo.Height;
                 verticalResolution.Value = file.VideoInfo.Height;
 
-                if (File.Exists(strSourceFileName))
+                if (System.IO.File.Exists(strSourceFileName))
                 {
                     MediaInfoFile oInfo = new MediaInfoFile(strSourceFileName);
                     arChooser.Value = oInfo.VideoInfo.DAR;
@@ -1003,58 +1041,54 @@ namespace MeGUI
         #region autodeint
         private void analyseButton_Click(object sender, EventArgs e)
         {
-            if (input.Filename.Length == 0)
+            if (input.Filename.Length > 0)
             {
+                if (detector == null) // We want to start the analysis
+                {
+                    string source = ScriptServer.GetInputLine(input.Filename, indexFile, false, sourceType, false, false, false, 0, false);
+                    if (nvDeInt.Enabled) 
+                        source += ")";
+
+                    // get number of frames
+                    int numFrames = 0;
+                    try
+                    {
+                        using (AvsFile af = AvsFile.ParseScript(source))
+                        {
+                            numFrames = (int)af.VideoInfo.FrameCount;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("The input clip for source detection could not be opened.\r\n" + ex.Message, "Analysis Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
+                    detector = new SourceDetector(source,
+                        input.Filename, deintIsAnime.Checked, numFrames,
+                        mainForm.Settings.SourceDetectorSettings,
+                        new UpdateSourceDetectionStatus(analyseUpdate),
+                        new FinishedAnalysis(finishedAnalysis));
+                        detector.analyse();
+                        deintStatusLabel.Text = "Analysing...";
+                        analyseButton.Text = "Abort";
+                }
+                else // We want to cancel the analysis
+                {
+                    if (detector != null)
+                    {
+                        detector.stop();
+                        detector = null;
+                    }
+                    analyseButton.Text = "Analyse";
+                    this.deintProgressBar.Value = 0;
+                    deintStatusLabel.Text = "";
+                }
+            }
+            else
                 MessageBox.Show("Can't run any analysis as there is no selected video to analyse.",
                     "Please select a video input file", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            if (detector == null && analyseButton.Text.Equals("Analyse")) // We want to start the analysis
-            {
-                analyseButton.Text = "Abort";
-
-                string source = ScriptServer.GetInputLine(input.Filename, indexFile, false, sourceType, false, false, false, 0, false);
-                if (nvDeInt.Enabled)
-                    source += ")";
-
-                // get number of frames
-                int numFrames = 0;
-                try
-                {
-                    using (AvsFile af = AvsFile.ParseScript(source))
-                    {
-                        numFrames = (int)af.VideoInfo.FrameCount;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("The input clip for source detection could not be opened.\r\n" + ex.Message, "Analysis Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-
-                detector = new SourceDetector(source,
-                    input.Filename, deintIsAnime.Checked, numFrames,
-                    mainForm.Settings.SourceDetectorSettings,
-                    new UpdateSourceDetectionStatus(analyseUpdate),
-                    new FinishedAnalysis(finishedAnalysis));
-                detector.analyse();
-                deintStatusLabel.Text = "Analysing...";
-                analyseButton.Text = "Abort";
-            }
-            else // We want to cancel the analysis
-            {
-                if (detector != null)
-                {
-                    detector.stop();
-                    detector = null;
-                }
-                analyseButton.Text = "Analyse";
-                this.deintProgressBar.Value = 0;
-                deintStatusLabel.Text = "";
-            }
         }
-                
 
         public void finishedAnalysis(SourceInfo info, bool error, string errorMessage)
         {
@@ -1438,6 +1472,8 @@ namespace MeGUI
         {
             if (player != null && !player.Visible)
                 player.Show();
+
+            input.PerformClick();
         }
 
         private void resize_CheckedChanged(object sender, EventArgs e)
@@ -1448,32 +1484,29 @@ namespace MeGUI
                 updateEverything(sender != null, false, false);
         }
     }
-    public delegate void OpenScriptCallback(string avisynthScript, MediaInfoFile oInfo);
-    public enum PossibleSources { d2v, dgm, dgi, vdr, directShow, avs, ffindex, lsmash };
-    public enum mod16Method : int { none = -1, resize = 0, overcrop, nonMod16, mod4Horizontal, undercrop };
-    public enum modValue : int { mod16 = 0, mod8, mod4, mod2 };
 
-    public class AviSynthWindowTool : MeGUI.core.plugins.interfaces.ITool
+    public class CustomAviSynthWindowTool : MeGUI.core.plugins.interfaces.ITool
     {
 
         #region ITool Members
 
         public string Name
         {
-            get { return "AVS Script Creator"; }
+            get { return "Custom AVS Script Creator"; }
         }
 
         public void Run(MainForm info)
         {
             info.ClosePlayer();
-            AviSynthWindow asw = new AviSynthWindow(info);
+            CustomAviSynthWindow asw = new CustomAviSynthWindow(info);
             asw.OpenScript += new OpenScriptCallback(info.Video.openVideoFile);
+            asw.QueueHdSource += info.QueueHdSource;
             asw.Show();
         }
 
         public Shortcut[] Shortcuts
         {
-            get { return new Shortcut[] { Shortcut.CtrlR }; }
+            get { return new Shortcut[] { Shortcut.CtrlA }; }
         }
 
         #endregion
@@ -1482,7 +1515,7 @@ namespace MeGUI
 
         public string ID
         {
-            get { return "AvsCreator"; }
+            get { return "CustomAvsCreator"; }
         }
 
         #endregion

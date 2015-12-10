@@ -145,7 +145,7 @@ namespace MeGUI
             openButton.PerformClick();
         }
 
-        private void setFilename(string filename)
+        public void setFilename(string filename)
         {
             oldName = this.filename.Text;
             using (IDisposable a = raiseEvent.Wrap())

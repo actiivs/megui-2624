@@ -547,14 +547,15 @@ namespace MeGUI
                         _VideoInfo.FrameCount = (ulong)(easyParseInt(track.FrameCount) ?? 0);
                         _VideoInfo.ScanType = track.ScanTypeString;
                         _VideoInfo.Codec = getVideoCodec(track.Codec);
-                        if (_VideoInfo.Codec == null)
+                        if (_VideoInfo.Codec == null && track.Format != "AVS")
                             _VideoInfo.Codec = getVideoCodec(track.Format); // sometimes codec info is not available, check the format then...
 #if DEBUG
                         if (_VideoInfo.Codec == null)
                         {
                             if (_Log == null)
                                 _Log = MainForm.Instance.Log.Info("MediaInfo");
-                            _Log.LogEvent("Unknown video codec found: " + track.Codec + " / " + track.Format, ImageType.Warning);
+                            if (track.Format != "AVS")
+                                _Log.LogEvent("Unknown video codec found: " + track.Codec + " / " + track.Format, ImageType.Warning);
                         }
 #endif
                         _VideoInfo.Type = getVideoType(_VideoInfo.Codec, cType, file);
