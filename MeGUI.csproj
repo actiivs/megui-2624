@@ -1115,6 +1115,7 @@
     </EmbeddedResource>
     <EmbeddedResource Include="pause.ico" />
     <EmbeddedResource Include="play.ico" />
+    <None Include="QTfiles.7z" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config">
