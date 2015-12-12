@@ -481,6 +481,7 @@
     <Compile Include="packages\tools\avscreator\CustomAviSynthWindow.Designer.cs">
       <DependentUpon>CustomAviSynthWindow.cs</DependentUpon>
     </Compile>
+    <Compile Include="packages\tools\avscreator\QueueJobEventArgs.cs" />
     <Compile Include="packages\tools\chaptercreator\BDInfo\TSStreamFile.cs" />
     <Compile Include="packages\tools\cqmeditor\QuantizerMatrixDialog.Designer.cs">
       <DependentUpon>QuantizerMatrixDialog.cs</DependentUpon>

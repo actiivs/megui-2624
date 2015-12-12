@@ -31,7 +31,6 @@ using MeGUI.core.util;
 
 namespace MeGUI
 {
-
     /// <summary>
 	/// Summary description for AviSynthWindow.
 	/// </summary>
@@ -57,15 +56,11 @@ namespace MeGUI
         private LogItem _oLog;
 		#endregion
 
-        public event EventHandler<QueueHdSourceEventArgs> QueueHdSource;
-        public class QueueHdSourceEventArgs : EventArgs
-        {
-            public decimal Fps { get; set; }
-            public string FilenameWithoutExtension { get; set; }
-            public string SourceFilename { get; set; }
-        }
+        public event EventHandler<QueueJobEventArgs> QueueHdSource;
+        public event EventHandler<QueueJobEventArgs> QueueD2vSource;
 
         private bool isHdSource;
+        private bool isD2vSource;
         private readonly List<string> hdSourceKeyword = new List<string>
         {
             "[FHD]",
@@ -181,17 +176,17 @@ namespace MeGUI
         #region buttons
         private void input_FileSelected(FileBar sender, FileBarEventArgs args)
         {
-            if (hdSourceKeyword.Any(keyword => input.Filename.Contains(keyword)))
-            {
-                isHdSource = true;
+            isHdSource = hdSourceKeyword.Any(keyword => input.Filename.Contains(keyword));
+            isD2vSource = input.Filename.EndsWith(".d2v");
+
+            if (isHdSource || isD2vSource)
                 avsProfile.SelectProfile("AviSynth: *scratchpad*");
-            }
 
             scriptRefresh--;
             openVideoSource(input.Filename, null);
             updateEverything(true, true, resize.Checked);
 
-            if (isHdSource)
+            if (isHdSource || isD2vSource)
             {
                 while (!player.CanClose)
                 {
@@ -268,7 +263,17 @@ namespace MeGUI
 
                     if (isHdSource && QueueHdSource != null)
                     {
-                        QueueHdSource(this, new QueueHdSourceEventArgs
+                        QueueHdSource(this, new QueueJobEventArgs
+                        {
+                            Fps = fpsBox.Value,
+                            SourceFilename = sourceFilename,
+                            FilenameWithoutExtension = fileName.Replace(".avs", string.Empty),
+                        });
+                    }
+
+			        if (isD2vSource && QueueD2vSource != null)
+			        {
+                        QueueD2vSource(this, new QueueJobEventArgs
                         {
                             Fps = fpsBox.Value,
                             SourceFilename = sourceFilename,
@@ -374,8 +379,18 @@ namespace MeGUI
 		        var trim = string.Format("trim(0,{0})", file.VideoInfo.FrameCount - 4);
 		        avisynthScript.Text = avisynthScript.Text.Replace("#deinterlace", string.Format("#deinterlace{0}{1}", Environment.NewLine, trim));
 		    }
-            
-		    if (!oldScript.Equals(avisynthScript.Text))
+
+            if (file != null && videoOutput != null && isD2vSource)
+            {
+                if ((int) file.VideoInfo.Width == 720)
+                {
+                    avisynthScript.Text = avisynthScript.Text.Replace("LanczosResize(720,392) # Lanczos (Sharp)",
+                        "LanczosResize(720,400) # Lanczos (Sharp)");
+                }
+                avisynthScript.Text = avisynthScript.Text.Replace("#deinterlace", string.Format("Load_Stdcall_Plugin(\"E:\\Software\\Video Tool\\MeGUI_2624_x86\\tools\\avisynth_plugin\\yadif.dll\"){0}Yadif(order = -1)", Environment.NewLine));
+            }
+
+            if (!oldScript.Equals(avisynthScript.Text))
                 chAutoPreview_CheckedChanged(null, null);
 		}
 		#endregion
@@ -1501,6 +1516,7 @@ namespace MeGUI
             CustomAviSynthWindow asw = new CustomAviSynthWindow(info);
             asw.OpenScript += new OpenScriptCallback(info.Video.openVideoFile);
             asw.QueueHdSource += info.QueueHdSource;
+            asw.QueueD2vSource += info.QueueD2vSource;
             asw.Show();
         }
 

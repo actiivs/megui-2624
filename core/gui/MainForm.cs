@@ -1424,7 +1424,7 @@ namespace MeGUI
                 settings.MainFormSize = this.ClientSize;
         }
 
-        public void QueueHdSource(object sender, CustomAviSynthWindow.QueueHdSourceEventArgs e)
+        public void QueueHdSource(object sender, QueueJobEventArgs e)
         {
             videoEncodingComponent1.SelectProfile("x264: Medium - 1600k");
             videoEncodingComponent1.QueueJob();
@@ -1435,6 +1435,31 @@ namespace MeGUI
                 audioEncodingComponent1.SelectProfile(audioEncodingComponent1.Tabs[0], "QAAC: 96Kbps");
                 audioEncodingComponent1.QueueJob(audioEncodingComponent1.Tabs[0]);
                 
+                MuxWindow mw = new MuxWindow(PackageSystem.MuxerProviders["mkvmerge"], this);
+                var videoOutput = string.Format("{0}.264", e.FilenameWithoutExtension);
+                var audioOutput = audioEncodingComponent1.Tabs[0].AudioOutput;
+                var output = string.Format("{0}.mkv", e.FilenameWithoutExtension);
+                mw.QueueMuxJob(videoOutput, audioOutput, output, e.Fps);
+            }
+        }
+
+        public void QueueD2vSource(object sender, QueueJobEventArgs e)
+        {
+            videoEncodingComponent1.SelectProfile("x264: Slow - 1400k");
+            videoEncodingComponent1.QueueJob();
+
+            var srcName = Path.GetFileNameWithoutExtension(e.SourceFilename);
+            var srcFolder = Path.GetDirectoryName(e.SourceFilename);
+            var audioFilePath = Directory.GetFiles(srcFolder).FirstOrDefault(f => f.Contains(srcName) && f.EndsWith(".ac3"));
+
+            if(!string.IsNullOrEmpty(audioFilePath))
+                audioEncodingComponent1.openAudioFile(audioFilePath);
+
+            if (audioEncodingComponent1.Tabs.Any())
+            {
+                audioEncodingComponent1.SelectProfile(audioEncodingComponent1.Tabs[0], "QAAC: 96Kbps");
+                audioEncodingComponent1.QueueJob(audioEncodingComponent1.Tabs[0]);
+
                 MuxWindow mw = new MuxWindow(PackageSystem.MuxerProviders["mkvmerge"], this);
                 var videoOutput = string.Format("{0}.264", e.FilenameWithoutExtension);
                 var audioOutput = audioEncodingComponent1.Tabs[0].AudioOutput;
