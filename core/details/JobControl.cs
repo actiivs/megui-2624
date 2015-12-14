@@ -308,6 +308,35 @@ namespace MeGUI.core.details
         /// <param name="job">the job to be removed</param>
         internal void RemoveCompletedJob(TaggedJob job)
         {
+            if (job.Job is MuxJob)
+            {
+                var inputName = Path.GetFileNameWithoutExtension(job.InputFile);
+                var path = Path.GetDirectoryName(job.InputFile);
+
+                foreach (var filePath in Directory.GetFiles(path, string.Format("{0}*", inputName)))
+                {
+                    if(filePath.EndsWith(".mkv")) continue;
+                    try
+                    {
+                        File.Delete(filePath);
+                    }
+                    catch (Exception)
+                    {
+                        // ignored
+                    }
+                }
+                
+                foreach (var keyword in CustomAviSynthWindow.HdSourceKeyword)
+                {
+                    if (job.InputFileName.Contains(keyword))
+                    {
+                        var oldName = string.Format("D:\\{0}.mkv", inputName);
+                        var newName = string.Format("D:\\!{0}.mkv", inputName);
+                        File.Move(oldName, newName);
+                    }
+                }
+            }
+
             reallyDeleteJob(job);
         }
 

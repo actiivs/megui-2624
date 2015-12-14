@@ -61,7 +61,7 @@ namespace MeGUI
 
         private bool isHdSource;
         private bool isD2vSource;
-        private readonly List<string> hdSourceKeyword = new List<string>
+        public static readonly List<string> HdSourceKeyword = new List<string>
         {
             "[FHD]",
             "[HD]",
@@ -176,7 +176,7 @@ namespace MeGUI
         #region buttons
         private void input_FileSelected(FileBar sender, FileBarEventArgs args)
         {
-            isHdSource = hdSourceKeyword.Any(keyword => input.Filename.Contains(keyword));
+            isHdSource = HdSourceKeyword.Any(keyword => input.Filename.Contains(keyword));
             isD2vSource = input.Filename.EndsWith(".d2v");
 
             if (isHdSource || isD2vSource)
@@ -402,10 +402,13 @@ namespace MeGUI
         /// <param name="videoInput"></param>
         private void openVideoSource(string videoInput, string indexFileTemp)
         {
-            string ext, projectPath, fileNameNoPath;
+            string ext, projectPath = null, fileNameNoPath;
 
             indexFile = indexFileTemp;
-            projectPath = mainForm.Settings.DefaultOutputDir;
+
+            if (videoInput.Contains("D:\\"))
+                projectPath = mainForm.Settings.DefaultOutputDir;
+
             if (String.IsNullOrEmpty(indexFile))
             {
                 ext = Path.GetExtension(videoInput).ToLowerInvariant();
