@@ -1,6 +1,6 @@
 // ****************************************************************************
 // 
-// Copyright (C) 2005-2015 Doom9 & al
+// Copyright (C) 2005-2016 Doom9 & al
 // 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,16 +20,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using System.Xml;
-
-using MeGUI.core.details.video;
-using MeGUI.core.gui;
-using MeGUI.core.plugins.interfaces;
 
 namespace MeGUI.packages.video.x264
 {
@@ -783,16 +776,16 @@ namespace MeGUI.packages.video.x264
                     break;
                 case 6: // Slow
                     {
-                        if (x264METype.SelectedIndex != 2)
-                            x264METype.SelectedIndex = 2;
+                        if (x264METype.SelectedIndex != 1)
+                            x264METype.SelectedIndex = 1;
                         if (x264SubpelRefinement.SelectedIndex != 8)
                             x264SubpelRefinement.SelectedIndex = 8;
                         if (x264NewAdaptiveBframes.SelectedIndex != 2)
                             x264NewAdaptiveBframes.SelectedIndex = 2;
                         if (x264BframePredictionMode.SelectedIndex != 3)
                             x264BframePredictionMode.SelectedIndex = 3;
-                        if (trellis.SelectedIndex != 1)
-                            trellis.SelectedIndex = 1;
+                        if (trellis.SelectedIndex != 2)
+                            trellis.SelectedIndex = 2;
                         if (x264MixedReferences.Checked)
                              x264MixedReferences.Checked = false;
                         if (!mbtree.Checked)
