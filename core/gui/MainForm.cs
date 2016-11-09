@@ -160,7 +160,7 @@ namespace MeGUI
             string[] resources = myAssembly.GetManifestResourceNames();
             this.trayIcon.Icon = new Icon(myAssembly.GetManifestResourceStream(name + "App.ico"));
             this.Icon = trayIcon.Icon;
-            this.TitleText = Application.ProductName + " " + new System.Version(Application.ProductVersion).Build;
+            this.TitleText = Application.ProductName + " " + new System.Version(Application.ProductVersion).Build + " [r2665]";
 #if x64
             this.TitleText += " x64";
 #endif
