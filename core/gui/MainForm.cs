@@ -25,6 +25,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Serialization;
@@ -33,6 +34,8 @@ using MeGUI.core.details;
 using MeGUI.core.gui;
 using MeGUI.core.plugins.interfaces;
 using MeGUI.core.util;
+using Utils.MessageBoxExLib;
+using Action = System.Action;
 
 namespace MeGUI
 {
@@ -967,6 +970,10 @@ namespace MeGUI
             PackageSystem.Tools.Register(new MeGUI.packages.tools.cutter.CutterTool());
             PackageSystem.Tools.Register(new AviSynthWindowTool());
             PackageSystem.Tools.Register(new CustomAviSynthWindowTool());
+            //PackageSystem.Tools.Register(new JpavmeMVSD280_AviSynthWindowTool());
+            PackageSystem.Tools.Register(new ThzBTCom_AviSynthWindowTool());
+            PackageSystem.Tools.Register(new hjavSDAB_AviSynthWindowTool());
+            PackageSystem.Tools.Register(new hjavKAWD_AviSynthWindowTool());
             PackageSystem.Tools.Register(new AutoEncodeTool());
             PackageSystem.Tools.Register(new CQMEditorTool());
             PackageSystem.Tools.Register(new CalculatorTool());
@@ -1426,13 +1433,13 @@ namespace MeGUI
 
         public void QueueHdSource(object sender, QueueJobEventArgs e)
         {
-            videoEncodingComponent1.SelectProfile("x264: Medium - 1600k");
+            videoEncodingComponent1.SelectProfile("x264: Slow - 2000k");
             videoEncodingComponent1.QueueJob();
             
             audioEncodingComponent1.openAudioFile(e.SourceFilename);
             if (audioEncodingComponent1.Tabs.Any())
             {
-                audioEncodingComponent1.SelectProfile(audioEncodingComponent1.Tabs[0], "QAAC: 96Kbps");
+                audioEncodingComponent1.SelectProfile(audioEncodingComponent1.Tabs[0], "QAAC: 128Kbps");
                 audioEncodingComponent1.QueueJob(audioEncodingComponent1.Tabs[0]);
                 
                 MuxWindow mw = new MuxWindow(PackageSystem.MuxerProviders["mkvmerge"], this);
@@ -1445,7 +1452,7 @@ namespace MeGUI
 
         public void QueueD2vSource(object sender, QueueJobEventArgs e)
         {
-            videoEncodingComponent1.SelectProfile("x264: Slow - 1400k");
+            videoEncodingComponent1.SelectProfile("x264: Slow - 1200k");
             videoEncodingComponent1.QueueJob();
 
             var srcName = Path.GetFileNameWithoutExtension(e.SourceFilename);
@@ -1465,6 +1472,79 @@ namespace MeGUI
                 var audioOutput = audioEncodingComponent1.Tabs[0].AudioOutput;
                 var output = string.Format("{0}.mkv", e.FilenameWithoutExtension);
                 mw.QueueMuxJob(videoOutput, audioOutput, output, e.Fps);
+            }
+        }
+
+        public async void QueueJpavmeSource(object sender, QueueJobEventArgs e)
+        {
+            var ret = await Task.Run(() => MessageBox.Show("Queue Jobs?", "Jobs", MessageBoxButtons.YesNo, MessageBoxIcon.Question));
+            if (ret == DialogResult.Yes)
+            {
+                ClosePlayer();
+                videoEncodingComponent1.SelectProfile("x264: Slow - 1400k");
+                videoEncodingComponent1.QueueJob();
+
+                audioEncodingComponent1.openAudioFile(e.SourceFilename);
+                if (audioEncodingComponent1.Tabs.Any())
+                {
+                    audioEncodingComponent1.SelectProfile(audioEncodingComponent1.Tabs[0], "QAAC: 96Kbps");
+                    audioEncodingComponent1.QueueJob(audioEncodingComponent1.Tabs[0]);
+
+                    MuxWindow mw = new MuxWindow(PackageSystem.MuxerProviders["mkvmerge"], this);
+                    var videoOutput = string.Format("{0}.264", e.FilenameWithoutExtension);
+                    var audioOutput = audioEncodingComponent1.Tabs[0].AudioOutput;
+                    var output = string.Format("{0}.mkv", e.FilenameWithoutExtension);
+                    mw.QueueMuxJob(videoOutput, audioOutput, output, e.Fps);
+                }
+            }
+            else
+            {
+                ClosePlayer();
+                if (!e.SourceFilename.Contains("D:\\") && File.Exists(e.SourceFilename))
+                {
+                    if (e.SourceFilename.Contains(".mkv"))
+                        File.Move(e.SourceFilename, e.SourceFilename.Replace(".mkv", ""));
+                    else if (e.SourceFilename.Contains(".mp4"))
+                        File.Move(e.SourceFilename, e.SourceFilename.Replace(".mp4", ""));
+                    else if (e.SourceFilename.Contains(".wmv"))
+                        File.Move(e.SourceFilename, e.SourceFilename.Replace(".wmv", ""));
+                    else if (e.SourceFilename.Contains(".avi"))
+                        File.Move(e.SourceFilename, e.SourceFilename.Replace(".avi", ""));
+                }
+            }
+        }
+
+        private EventHandler QueueThzBTCom_Local;
+        private EventHandler QueueThzBTCom_Remote;
+
+        public void QueueThzBTComSource(object sender, QueueJobEventArgs e)
+        {
+            if ((e.SourceFilename.Contains("D:\\") || e.SourceFilename.Contains("E:\\") || e.SourceFilename.Contains("F:\\") || e.SourceFilename.Contains("G:\\")) && File.Exists(e.SourceFilename))
+            {
+                QueueThzBTCom_Local = (o, args) =>
+                {
+                    videoEncodingComponent1.PlayerClosed -= QueueThzBTCom_Local;
+                    videoEncodingComponent1.SelectProfile("x264: Slow - 2000k");
+                    videoEncodingComponent1.QueueJob();
+                };
+                videoEncodingComponent1.PlayerClosed += QueueThzBTCom_Local;
+            }
+            else
+            {
+                QueueThzBTCom_Remote = (o, args) =>
+                {
+                    videoEncodingComponent1.PlayerClosed -= QueueThzBTCom_Remote;
+
+                    if (e.SourceFilename.Contains(".mkv"))
+                        File.Move(e.SourceFilename, e.SourceFilename.Replace(".mkv", ""));
+                    else if (e.SourceFilename.Contains(".mp4"))
+                        File.Move(e.SourceFilename, e.SourceFilename.Replace(".mp4", ""));
+                    else if (e.SourceFilename.Contains(".wmv"))
+                        File.Move(e.SourceFilename, e.SourceFilename.Replace(".wmv", ""));
+                    else if (e.SourceFilename.Contains(".avi"))
+                        File.Move(e.SourceFilename, e.SourceFilename.Replace(".avi", ""));
+                };
+                videoEncodingComponent1.PlayerClosed += QueueThzBTCom_Remote;
             }
         }
     }

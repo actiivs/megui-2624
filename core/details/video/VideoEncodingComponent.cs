@@ -30,6 +30,8 @@ namespace MeGUI
 {
     public partial class VideoEncodingComponent : UserControl
     {
+        public event EventHandler PlayerClosed;
+
         #region video info
         private VideoInfo info; 
         private VideoPlayer player; // window that shows a preview of the video
@@ -383,6 +385,10 @@ namespace MeGUI
         /// <param name="e"></param>
         private void player_Closed(object sender, EventArgs e)
         {
+            if (PlayerClosed != null)
+            {
+                PlayerClosed(this, EventArgs.Empty);
+            }
             this.player = null;
         }
         /// <summary>

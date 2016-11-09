@@ -34,7 +34,7 @@ namespace MeGUI
     /// <summary>
 	/// Summary description for AviSynthWindow.
 	/// </summary>
-	public partial class CustomAviSynthWindow : Form
+	public partial class hjavSDAB_AviSynthWindow : Form
 	{
 		#region variable declaration
         private string originalScript;
@@ -56,33 +56,10 @@ namespace MeGUI
         private LogItem _oLog;
 		#endregion
 
-        public event EventHandler<QueueJobEventArgs> QueueHdSource;
-        public event EventHandler<QueueJobEventArgs> QueueD2vSource;
-
-        private bool isHdSource;
-        private bool isD2vSource;
-        public static readonly List<string> HdSourceKeyword = new List<string>
-        {
-            "[FHD]",
-            "[HD]",
-            ".1080p",
-            ".720p",
-        };
-
-        public static readonly List<string> UncensoredKeyword = new List<string>
-        {
-            "carib",
-            "1pon",
-            "mura",
-            "10mu",
-            "gachi",
-            "paco",
-            "heyzo",
-            "heydouga",
-        };
-
-        #region construction/deconstruction
-        public CustomAviSynthWindow(MainForm mainForm)
+        public event EventHandler<QueueJobEventArgs> QueuehjavSource;
+        
+		#region construction/deconstruction
+        public hjavSDAB_AviSynthWindow(MainForm mainForm)
         {
             scriptRefresh--;
             eventsOn = false;
@@ -159,14 +136,14 @@ namespace MeGUI
 		/// then opens a preview window with the video given as parameter
 		/// </summary>
 		/// <param name="videoInput">the DGIndex script to be loaded</param>
-		public CustomAviSynthWindow(MainForm mainForm, string videoInput) : this(mainForm)
+		public hjavSDAB_AviSynthWindow(MainForm mainForm, string videoInput) : this(mainForm)
 		{
             scriptRefresh--;
             openVideoSource(videoInput, null);
             updateEverything(true, true, resize.Checked);
 		}
 
-        public CustomAviSynthWindow(MainForm mainForm, string videoInput, string indexFile)
+        public hjavSDAB_AviSynthWindow(MainForm mainForm, string videoInput, string indexFile)
             : this(mainForm)
         {
             scriptRefresh--;
@@ -188,40 +165,30 @@ namespace MeGUI
         #region buttons
         private void input_FileSelected(FileBar sender, FileBarEventArgs args)
         {
-            isHdSource = HdSourceKeyword.Any(keyword => input.Filename.Contains(keyword));
-            isD2vSource = input.Filename.EndsWith(".d2v");
+            avsProfile.SelectProfile("AviSynth: *scratchpad*");
 
-            if (isHdSource && UncensoredKeyword.All(u => !input.Filename.Contains(u)))
+            var path = Path.GetDirectoryName(input.Filename);
+            var name = Path.GetFileNameWithoutExtension(input.Filename);
+            var ext = Path.GetExtension(input.Filename);
+            if (!FileUtil.IsAllLetterUpper(name))
             {
-                var path = Path.GetDirectoryName(input.Filename);
-                var name = Path.GetFileNameWithoutExtension(input.Filename);
-                var ext = Path.GetExtension(input.Filename);
-                if (!FileUtil.IsAllLetterUpper(name))
-                {
-                    var upperName = name.ToUpper();
-                    var newFilePath = Path.Combine(path, upperName + ext);
-                    File.Move(input.Filename, newFilePath);
-                    input.Filename = newFilePath;
-                }
+                var upperName = name.ToUpper();
+                var newFilePath = Path.Combine(path, upperName + ext);
+                File.Move(input.Filename, newFilePath);
+                input.Filename = newFilePath;
             }
-
-            if (isHdSource || isD2vSource)
-                avsProfile.SelectProfile("AviSynth: *scratchpad*");
 
             scriptRefresh--;
             openVideoSource(input.Filename, null);
             updateEverything(true, true, resize.Checked);
 
-            if (isHdSource || isD2vSource)
+            while (!player.CanClose)
             {
-                while (!player.CanClose)
-                {
-                    Application.DoEvents();
-                    Thread.Sleep(100);
-                }
-                player.Close();
-                saveButton_Click(saveButton, EventArgs.Empty);
+                Application.DoEvents();
+                Thread.Sleep(100);
             }
+            player.Close();
+            saveButton_Click(saveButton, EventArgs.Empty);
         }
         
 		private void openDLLButton_Click(object sender, System.EventArgs e)
@@ -272,41 +239,14 @@ namespace MeGUI
 				    player.Close();
 				this.Close();
 
-			    if (!sourceFilename.Contains("D:\\") && !sourceFilename.Contains("E:\\") && !sourceFilename.Contains("G:\\") && File.Exists(sourceFilename))
-			    {
-                    if (sourceFilename.Contains(".mkv"))
-			            File.Move(sourceFilename, sourceFilename.Replace(".mkv", ""));
-                    else if (sourceFilename.Contains(".mp4"))
-                        File.Move(sourceFilename, sourceFilename.Replace(".mp4", ""));
-                    else if (sourceFilename.Contains(".wmv"))
-                        File.Move(sourceFilename, sourceFilename.Replace(".wmv", ""));
-                    else if (sourceFilename.Contains(".avi"))
-                        File.Move(sourceFilename, sourceFilename.Replace(".avi", ""));
-			    }
-			    else
-			    {
-                    OpenScript(fileName, null);
+			    OpenScript(fileName, null);
 
-                    if (isHdSource && QueueHdSource != null)
-                    {
-                        QueueHdSource(this, new QueueJobEventArgs
-                        {
-                            Fps = fpsBox.Value,
-                            SourceFilename = sourceFilename,
-                            FilenameWithoutExtension = fileName.Replace(".avs", string.Empty),
-                        });
-                    }
-
-			        if (isD2vSource && QueueD2vSource != null)
-			        {
-                        QueueD2vSource(this, new QueueJobEventArgs
-                        {
-                            Fps = fpsBox.Value,
-                            SourceFilename = sourceFilename,
-                            FilenameWithoutExtension = fileName.Replace(".avs", string.Empty),
-                        });
-                    }
-			    }
+                QueuehjavSource(this, new QueueJobEventArgs
+                {
+                    Fps = fpsBox.Value,
+                    SourceFilename = sourceFilename,
+                    FilenameWithoutExtension = fileName.Replace(".avs", string.Empty),
+                });
             }
 		}
 
@@ -396,24 +336,19 @@ namespace MeGUI
             string oldScript = avisynthScript.Text;
             avisynthScript.Text = this.generateScript();
 
-            if (file != null && videoOutput != null && isHdSource)
-		    {
-		        if ((int)file.VideoInfo.Width == 1920 && (int)file.VideoInfo.Height == 1080)
-		        {
-                    avisynthScript.Text = avisynthScript.Text.Replace("#resize", "LanczosResize(1280,720) # Lanczos (Sharp)");
-		        }
-		    }
-
-            if (file != null && videoOutput != null && isD2vSource)
+            if (file != null && videoOutput != null)
             {
-                if ((int) file.VideoInfo.Width == 720)
-                {
-                    avisynthScript.Text = avisynthScript.Text.Replace("LanczosResize(720,392) # Lanczos (Sharp)",
-                        "LanczosResize(720,400) # Lanczos (Sharp)");
-                }
-                avisynthScript.Text = avisynthScript.Text.Replace("#deinterlace", string.Format("Load_Stdcall_Plugin(\"E:\\Software\\Video Tool\\MeGUI_2624_x86\\tools\\avisynth_plugin\\yadif.dll\"){0}Yadif(order = -1)", Environment.NewLine));
-            }
+                avisynthScript.Text = avisynthScript.Text.Insert(0,
+                    string.Format(
+                        "LoadPlugin(\"E:\\Software\\Video Tool\\MeGUI_2624_x86\\tools\\avisynth_plugin\\medianblur.dll\"){0}LoadPlugin(\"E:\\Software\\Video Tool\\MeGUI_2624_x86\\tools\\avisynth_plugin\\TTempSmooth.dll\"){0}LoadPlugin(\"E:\\Software\\Video Tool\\MeGUI_2624_x86\\tools\\avisynth_plugin\\FFT3DFilter.dll\"){0}LoadPlugin(\"E:\\Software\\Video Tool\\MeGUI_2624_x86\\tools\\avisynth_plugin\\mt_masktools.dll\"){0}Import(\"E:\\Software\\Video Tool\\MeGUI_2624_x86\\tools\\avisynth_plugin\\rm_logo.avs\"){0}Import(\"E:\\Software\\Video Tool\\MeGUI_2624_x86\\tools\\avisynth_plugin\\InpaintFunc.avs\"){0}LoadPlugin(\"E:\\Software\\Video Tool\\MeGUI_2624_x86\\tools\\avisynth_plugin\\RemoveGrain.dll\"){0}LoadCPlugin(\"E:\\Software\\Video Tool\\MeGUI_2624_x86\\tools\\avisynth_plugin\\AVSInpaint.dll\"){0}", Environment.NewLine));
 
+                var left = string.Format("left = last.trim(0,{0}){1}res = rm_logo(left,logomask=\"D:\\Data\\Logo\\[FHD]SDAB-0011.bmp\",loc=\"bl\",par=16.0/9.0,mode=\"both\",percent=80,pp=0,cutwidth=130,cutheight=66){1}res1 = rm_logo(res,logomask=\"D:\\Data\\Logo\\[FHD]SDAB-0012.bmp\",loc=\"br\",par=16.0/9.0,mode=\"both\",percent=80,pp=0,cutwidth=258,cutheight=66){1}{1}return res1.LanczosResize(1280,720)", file.VideoInfo.FrameCount - 3, Environment.NewLine);
+		        avisynthScript.Text = avisynthScript.Text.Replace("#deinterlace", string.Format("{0}{1}", Environment.NewLine, left));
+                var cropIndex = avisynthScript.Text.IndexOf("#crop", 0, StringComparison.OrdinalIgnoreCase);
+                if(cropIndex > 0)
+                    avisynthScript.Text = avisynthScript.Text.Remove(cropIndex);
+            }
+            
             if (!oldScript.Equals(avisynthScript.Text))
                 chAutoPreview_CheckedChanged(null, null);
 		}
@@ -430,7 +365,7 @@ namespace MeGUI
 
             indexFile = indexFileTemp;
 
-            if (videoInput.Contains("D:\\") || videoInput.Contains("E:\\"))
+            if (videoInput.Contains("D:\\"))
                 projectPath = mainForm.Settings.DefaultOutputDir;
 
             if (String.IsNullOrEmpty(indexFile))
@@ -1527,29 +1462,28 @@ namespace MeGUI
         }
     }
 
-    public class CustomAviSynthWindowTool : MeGUI.core.plugins.interfaces.ITool
+    public class hjavSDAB_AviSynthWindowTool : MeGUI.core.plugins.interfaces.ITool
     {
 
         #region ITool Members
 
         public string Name
         {
-            get { return "Custom AVS Script Creator"; }
+            get { return "hjavSDAB AVS Script Creator"; }
         }
 
         public void Run(MainForm info)
         {
             info.ClosePlayer();
-            CustomAviSynthWindow asw = new CustomAviSynthWindow(info);
+            var asw = new hjavSDAB_AviSynthWindow(info);
             asw.OpenScript += new OpenScriptCallback(info.Video.openVideoFile);
-            asw.QueueHdSource += info.QueueHdSource;
-            asw.QueueD2vSource += info.QueueD2vSource;
+            asw.QueuehjavSource += info.QueueThzBTComSource;
             asw.Show();
         }
 
         public Shortcut[] Shortcuts
         {
-            get { return new Shortcut[] { Shortcut.Alt1 }; }
+            get { return new Shortcut[] { Shortcut.Alt3 }; }
         }
 
         #endregion
@@ -1558,7 +1492,7 @@ namespace MeGUI
 
         public string ID
         {
-            get { return "CustomAvsCreator"; }
+            get { return "hjavSDAB_AvsCreator"; }
         }
 
         #endregion

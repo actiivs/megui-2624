@@ -794,5 +794,14 @@ namespace MeGUI.core.util
             }
         }
 
+        public static bool IsAllLetterUpper(string fileName)
+        {
+            for (var i = 0; i < fileName.Length; i++)
+            {
+                if (char.IsLetter(fileName[i]) && !char.IsUpper(fileName[i]))
+                    return false;
+            }
+            return true;
+        }
     }
 }

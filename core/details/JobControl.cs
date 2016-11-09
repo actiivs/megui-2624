@@ -315,7 +315,7 @@ namespace MeGUI.core.details
 
                 foreach (var filePath in Directory.GetFiles(path, string.Format("{0}*", inputName)))
                 {
-                    if(filePath.EndsWith(".mkv")) continue;
+                    if(filePath.EndsWith(".mkv") || filePath.EndsWith(".wmv") || filePath.EndsWith(".mp4")) continue;
                     try
                     {
                         File.Delete(filePath);
@@ -325,14 +325,36 @@ namespace MeGUI.core.details
                         // ignored
                     }
                 }
-                
-                foreach (var keyword in CustomAviSynthWindow.HdSourceKeyword)
+
+                foreach (var filePath in Directory.GetFiles("D:\\", string.Format("{0}*", inputName)))
                 {
-                    if (job.InputFileName.Contains(keyword))
+                    try
                     {
-                        var oldName = string.Format("D:\\{0}.mkv", inputName);
-                        var newName = string.Format("D:\\!{0}.mkv", inputName);
-                        File.Move(oldName, newName);
+                        var oldName = Path.GetFileName(filePath);
+                        var oldDir = Path.GetDirectoryName(filePath);
+                        var newName = string.Format("!{0}", oldName);
+                        var newPath = Path.Combine(oldDir, newName);
+                        File.Move(filePath, newPath);
+                    }
+                    catch (Exception)
+                    {
+                        // ignored
+                    }
+                }
+
+                foreach (var filePath in Directory.GetFiles("E:\\", string.Format("{0}*", inputName)))
+                {
+                    try
+                    {
+                        var oldName = Path.GetFileName(filePath);
+                        var oldDir = Path.GetDirectoryName(filePath);
+                        var newName = string.Format("!{0}", oldName);
+                        var newPath = Path.Combine(oldDir, newName);
+                        File.Move(filePath, newPath);
+                    }
+                    catch (Exception)
+                    {
+                        // ignored
                     }
                 }
             }

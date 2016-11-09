@@ -27,7 +27,7 @@
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
     <OldToolsVersion>3.5</OldToolsVersion>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
@@ -56,6 +56,7 @@
     <DebugType>full</DebugType>
     <PlatformTarget>x86</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <OutputPath>bin\x86\Release\</OutputPath>
@@ -68,6 +69,7 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
     <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
     <DebugSymbols>true</DebugSymbols>
@@ -81,6 +83,7 @@
     <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <NoStdLib>false</NoStdLib>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
     <OutputPath>bin\x64\Release\</OutputPath>
@@ -93,6 +96,7 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
     <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup />
   <PropertyGroup>
@@ -474,6 +478,30 @@
     </Compile>
     <Compile Include="core\gui\TextViewer.Designer.cs">
       <DependentUpon>TextViewer.cs</DependentUpon>
+    </Compile>
+    <Compile Include="packages\tools\avscreator\hjavKAWD_AviSynthWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="packages\tools\avscreator\hjavKAWD_AviSynthWindow.Designer.cs">
+      <DependentUpon>hjavKAWD_AviSynthWindow.cs</DependentUpon>
+    </Compile>
+    <Compile Include="packages\tools\avscreator\hjavSDAB_AviSynthWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="packages\tools\avscreator\hjavSDAB_AviSynthWindow.Designer.cs">
+      <DependentUpon>hjavSDAB_AviSynthWindow.cs</DependentUpon>
+    </Compile>
+    <Compile Include="packages\tools\avscreator\ThzBTCom_AviSynthWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="packages\tools\avscreator\ThzBTCom_AviSynthWindow.Designer.cs">
+      <DependentUpon>ThzBTCom_AviSynthWindow.cs</DependentUpon>
+    </Compile>
+    <Compile Include="packages\tools\avscreator\JpavmeMVSD280_AviSynthWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="packages\tools\avscreator\JpavmeMVSD280_AviSynthWindow.Designer.cs">
+      <DependentUpon>JpavmeMVSD280_AviSynthWindow.cs</DependentUpon>
     </Compile>
     <Compile Include="packages\tools\avscreator\CustomAviSynthWindow.cs">
       <SubType>Form</SubType>
@@ -971,6 +999,18 @@
     <EmbeddedResource Include="core\gui\TextViewer.resx">
       <SubType>Designer</SubType>
       <DependentUpon>TextViewer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="packages\tools\avscreator\hjavKAWD_AviSynthWindow.resx">
+      <DependentUpon>hjavKAWD_AviSynthWindow.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="packages\tools\avscreator\hjavSDAB_AviSynthWindow.resx">
+      <DependentUpon>hjavSDAB_AviSynthWindow.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="packages\tools\avscreator\ThzBTCom_AviSynthWindow.resx">
+      <DependentUpon>ThzBTCom_AviSynthWindow.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="packages\tools\avscreator\JpavmeMVSD280_AviSynthWindow.resx">
+      <DependentUpon>JpavmeMVSD280_AviSynthWindow.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="packages\tools\avscreator\CustomAviSynthWindow.resx">
       <DependentUpon>CustomAviSynthWindow.cs</DependentUpon>

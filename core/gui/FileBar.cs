@@ -137,6 +137,8 @@ namespace MeGUI
                 }
                 if (dialog.ShowDialog() == DialogResult.OK)
                     setFilename(dialog.FileName);
+
+                dialog.Dispose();
             }
         }
 
