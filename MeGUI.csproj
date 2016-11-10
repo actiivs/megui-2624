@@ -497,12 +497,6 @@
     <Compile Include="packages\tools\avscreator\ThzBTCom_AviSynthWindow.Designer.cs">
       <DependentUpon>ThzBTCom_AviSynthWindow.cs</DependentUpon>
     </Compile>
-    <Compile Include="packages\tools\avscreator\JpavmeMVSD280_AviSynthWindow.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="packages\tools\avscreator\JpavmeMVSD280_AviSynthWindow.Designer.cs">
-      <DependentUpon>JpavmeMVSD280_AviSynthWindow.cs</DependentUpon>
-    </Compile>
     <Compile Include="packages\tools\avscreator\CustomAviSynthWindow.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -1008,9 +1002,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="packages\tools\avscreator\ThzBTCom_AviSynthWindow.resx">
       <DependentUpon>ThzBTCom_AviSynthWindow.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="packages\tools\avscreator\JpavmeMVSD280_AviSynthWindow.resx">
-      <DependentUpon>JpavmeMVSD280_AviSynthWindow.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="packages\tools\avscreator\CustomAviSynthWindow.resx">
       <DependentUpon>CustomAviSynthWindow.cs</DependentUpon>
