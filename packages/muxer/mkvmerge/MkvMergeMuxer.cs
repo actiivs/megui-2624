@@ -316,6 +316,7 @@ new JobProcessorFactory(new ProcessorFactory(init), "MkvMergeMuxer");
                     sb.Append(" --split " + (settings.SplitSize.Value.MB) + "M");
 
                 sb.Append(" --engage no_cue_duration --engage no_cue_relative_position --ui-language en");
+                sb.Append(" --global-tags \"D:\\tags.xml\"");
 
                 return sb.ToString();
             }

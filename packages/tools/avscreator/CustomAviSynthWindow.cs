@@ -56,8 +56,7 @@ namespace MeGUI
         private LogItem _oLog;
 		#endregion
 
-        public event EventHandler<QueueJobEventArgs> QueueHdSource;
-        public event EventHandler<QueueJobEventArgs> QueueD2vSource;
+        public event EventHandler<CustomQueueJobEventArgs> QueuingJob;
 
         private bool isHdSource;
         private bool isD2vSource;
@@ -205,23 +204,19 @@ namespace MeGUI
                 }
             }
 
-            if (isHdSource || isD2vSource)
-                avsProfile.SelectProfile("AviSynth: *scratchpad*");
+            avsProfile.SelectProfile("AviSynth: *scratchpad*");
 
             scriptRefresh--;
             openVideoSource(input.Filename, null);
             updateEverything(true, true, resize.Checked);
 
-            if (isHdSource || isD2vSource)
+            while (!player.CanClose)
             {
-                while (!player.CanClose)
-                {
-                    Application.DoEvents();
-                    Thread.Sleep(100);
-                }
-                player.Close();
-                saveButton_Click(saveButton, EventArgs.Empty);
+                Application.DoEvents();
+                Thread.Sleep(100);
             }
+            player.Close();
+            saveButton_Click(saveButton, EventArgs.Empty);
         }
         
 		private void openDLLButton_Click(object sender, System.EventArgs e)
@@ -272,40 +267,17 @@ namespace MeGUI
 				    player.Close();
 				this.Close();
 
-			    if (!sourceFilename.Contains("D:\\") && !sourceFilename.Contains("E:\\") && !sourceFilename.Contains("G:\\") && File.Exists(sourceFilename))
-			    {
-                    if (sourceFilename.Contains(".mkv"))
-			            File.Move(sourceFilename, sourceFilename.Replace(".mkv", ""));
-                    else if (sourceFilename.Contains(".mp4"))
-                        File.Move(sourceFilename, sourceFilename.Replace(".mp4", ""));
-                    else if (sourceFilename.Contains(".wmv"))
-                        File.Move(sourceFilename, sourceFilename.Replace(".wmv", ""));
-                    else if (sourceFilename.Contains(".avi"))
-                        File.Move(sourceFilename, sourceFilename.Replace(".avi", ""));
-			    }
-			    else
-			    {
-                    OpenScript(fileName, null);
+                OpenScript(fileName, null);
 
-                    if (isHdSource && QueueHdSource != null)
-                    {
-                        QueueHdSource(this, new QueueJobEventArgs
-                        {
-                            Fps = fpsBox.Value,
-                            SourceFilename = sourceFilename,
-                            FilenameWithoutExtension = fileName.Replace(".avs", string.Empty),
-                        });
-                    }
-
-			        if (isD2vSource && QueueD2vSource != null)
+			    if (QueuingJob != null)
+			    {
+			        QueuingJob(this, new CustomQueueJobEventArgs
 			        {
-                        QueueD2vSource(this, new QueueJobEventArgs
-                        {
-                            Fps = fpsBox.Value,
-                            SourceFilename = sourceFilename,
-                            FilenameWithoutExtension = fileName.Replace(".avs", string.Empty),
-                        });
-                    }
+                        Fps = fpsBox.Value,
+                        SourceFilename = sourceFilename,
+                        FilenameWithoutExtension = fileName.Replace(".avs", string.Empty),
+                        IsD2V = isD2vSource,
+                    });
 			    }
             }
 		}
@@ -1542,8 +1514,10 @@ namespace MeGUI
             info.ClosePlayer();
             CustomAviSynthWindow asw = new CustomAviSynthWindow(info);
             asw.OpenScript += new OpenScriptCallback(info.Video.openVideoFile);
-            asw.QueueHdSource += info.QueueHdSource;
-            asw.QueueD2vSource += info.QueueD2vSource;
+            asw.QueuingJob += (sender, args) =>
+            {
+                args.Execute(info);
+            };
             asw.Show();
         }
 

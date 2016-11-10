@@ -56,7 +56,7 @@ namespace MeGUI
         private LogItem _oLog;
 		#endregion
 
-        public event EventHandler<QueueJobEventArgs> QueueThzBTComSource;
+        public event EventHandler<QueueJobEventArgs> QueuingJob;
         
 		#region construction/deconstruction
         public ThzBTCom_AviSynthWindow(MainForm mainForm)
@@ -241,13 +241,16 @@ namespace MeGUI
 
 			    OpenScript(fileName, null);
 
-                QueueThzBTComSource(this, new QueueJobEventArgs
-                {
-                    Fps = fpsBox.Value,
-                    SourceFilename = sourceFilename,
-                    FilenameWithoutExtension = fileName.Replace(".avs", string.Empty),
-                });
-            }
+			    if (QueuingJob != null)
+			    {
+			        QueuingJob(this, new QueueJobEventArgs
+			        {
+			            Fps = fpsBox.Value,
+			            SourceFilename = sourceFilename,
+			            FilenameWithoutExtension = fileName.Replace(".avs", string.Empty),
+			        });
+			    }
+			}
 		}
 
         #endregion
@@ -339,13 +342,11 @@ namespace MeGUI
             if (file != null && videoOutput != null)
             {
                 avisynthScript.Text = avisynthScript.Text.Insert(0,
-                    //string.Format("LoadPlugin(\"E:\\Software\\Video Tool\\MeGUI_2624_x86\\tools\\avisynth_plugin\\medianblur.dll\"){0}LoadPlugin(\"E:\\Software\\Video Tool\\MeGUI_2624_x86\\tools\\avisynth_plugin\\TTempSmooth.dll\"){0}LoadPlugin(\"E:\\Software\\Video Tool\\MeGUI_2624_x86\\tools\\avisynth_plugin\\FFT3DFilter.dll\"){0}LoadPlugin(\"E:\\Software\\Video Tool\\MeGUI_2624_x86\\tools\\avisynth_plugin\\mt_masktools.dll\"){0}Import(\"E:\\Software\\Video Tool\\MeGUI_2624_x86\\tools\\avisynth_plugin\\rm_logo.avs\"){0}Import(\"E:\\Software\\Video Tool\\MeGUI_2624_x86\\tools\\avisynth_plugin\\InpaintFunc.avs\"){0}LoadPlugin(\"E:\\Software\\Video Tool\\MeGUI_2624_x86\\tools\\avisynth_plugin\\RemoveGrain.dll\"){0}LoadCPlugin(\"E:\\Software\\Video Tool\\MeGUI_2624_x86\\tools\\avisynth_plugin\\AVSInpaint.dll\"){0}", Environment.NewLine));
                     string.Format("LoadPlugin(\"E:\\Software\\Video Tool\\MeGUI_2624_x86\\tools\\avisynth_plugin\\masktools2.dll\"){0}" +
-                                  "LoadPlugin(\"E:\\Software\\Video Tool\\MeGUI_2624_x86\\tools\\avisynth_plugin\\FFT3DFilter.dll\"){0}" +
-                                  "LoadPlugin(\"E:\\Software\\Video Tool\\MeGUI_2624_x86\\tools\\avisynth_plugin\\xlogo.dll\"){0}" +
-                                  "LoadPlugin(\"E:\\Software\\Video Tool\\MeGUI_2624_x86\\tools\\avisynth_plugin\\RemoveGrain.dll\"){0}", Environment.NewLine));
+                    "LoadPlugin(\"E:\\Software\\Video Tool\\MeGUI_2624_x86\\tools\\avisynth_plugin\\FFT3DFilter.dll\"){0}" +
+                    "LoadPlugin(\"E:\\Software\\Video Tool\\MeGUI_2624_x86\\tools\\avisynth_plugin\\xlogo.dll\"){0}" +
+                    "LoadPlugin(\"E:\\Software\\Video Tool\\MeGUI_2624_x86\\tools\\avisynth_plugin\\RemoveGrain.dll\"){0}", Environment.NewLine));
 
-                //var left = string.Format("left = last.trim(0,{0}).LanczosResize(1280,720){1}res = rm_logo(left,logomask=\"D:\\Data\\Logo\\ThzBTCom720.bmp\",loc=\"br\",par=16.0/9.0,mode=\"inpaint\",percent=80,pp=0,cutwidth=166,cutheight=66){1}{1}return res", file.VideoInfo.FrameCount - 3, Environment.NewLine);
                 var left = string.Format("left = last.LanczosResize(1280,720){1}res = xlogo(left, \"D:\\Data\\Logo\\Thz_x_1114_y_650_2.bmp\", X=1114, Y=650, alpha=0){1}logoNR(res, left, chroma=true, GPU=false, l=1114, t=650, r=0, b=0){1}{1}return last", file.VideoInfo.FrameCount - 3, Environment.NewLine);
                 avisynthScript.Text = avisynthScript.Text.Replace("#deinterlace", string.Format("{0}{1}", Environment.NewLine, left));
                 var cropIndex = avisynthScript.Text.IndexOf("#crop", 0, StringComparison.OrdinalIgnoreCase);
@@ -1481,7 +1482,10 @@ namespace MeGUI
             info.ClosePlayer();
             var asw = new ThzBTCom_AviSynthWindow(info);
             asw.OpenScript += new OpenScriptCallback(info.Video.openVideoFile);
-            asw.QueueThzBTComSource += info.QueueThzBTComSource;
+            asw.QueuingJob += (sender, args) =>
+            {
+                args.Execute(info);
+            };
             asw.Show();
         }
 

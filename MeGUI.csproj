@@ -479,6 +479,7 @@
     <Compile Include="core\gui\TextViewer.Designer.cs">
       <DependentUpon>TextViewer.cs</DependentUpon>
     </Compile>
+    <Compile Include="packages\tools\avscreator\CustomQueueJobEventArgs.cs" />
     <Compile Include="packages\tools\avscreator\hjavKAWD_AviSynthWindow.cs">
       <SubType>Form</SubType>
     </Compile>

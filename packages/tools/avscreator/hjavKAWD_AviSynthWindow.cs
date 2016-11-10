@@ -56,7 +56,7 @@ namespace MeGUI
         private LogItem _oLog;
 		#endregion
 
-        public event EventHandler<QueueJobEventArgs> QueuehjavSource;
+        public event EventHandler<QueueJobEventArgs> QueuingJob;
         
 		#region construction/deconstruction
         public hjavKAWD_AviSynthWindow(MainForm mainForm)
@@ -241,13 +241,16 @@ namespace MeGUI
 
 			    OpenScript(fileName, null);
 
-                QueuehjavSource(this, new QueueJobEventArgs
-                {
-                    Fps = fpsBox.Value,
-                    SourceFilename = sourceFilename,
-                    FilenameWithoutExtension = fileName.Replace(".avs", string.Empty),
-                });
-            }
+			    if (QueuingJob != null)
+			    {
+			        QueuingJob(this, new QueueJobEventArgs
+			        {
+			            Fps = fpsBox.Value,
+			            SourceFilename = sourceFilename,
+			            FilenameWithoutExtension = fileName.Replace(".avs", string.Empty),
+			        });
+			    }
+			}
 		}
 
         #endregion
@@ -1477,7 +1480,10 @@ namespace MeGUI
             info.ClosePlayer();
             var asw = new hjavKAWD_AviSynthWindow(info);
             asw.OpenScript += new OpenScriptCallback(info.Video.openVideoFile);
-            asw.QueuehjavSource += info.QueueThzBTComSource;
+            asw.QueuingJob += (sender, args) =>
+            {
+                args.Execute(info);
+            };
             asw.Show();
         }
 
