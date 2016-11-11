@@ -7,6 +7,15 @@ namespace MeGUI
     {
         public bool IsD2V { get; set; }
 
+        public bool IsLocal
+        {
+            get
+            {
+                return SourceFilename.Contains("D:\\") || SourceFilename.Contains("E:\\") 
+                    || SourceFilename.Contains("F:\\") || SourceFilename.Contains("G:\\");
+            }
+        }
+
         public override void Execute(MainForm main)
         {
             if (IsD2V)
@@ -35,7 +44,7 @@ namespace MeGUI
             }
             else
             {
-                if ((SourceFilename.Contains("D:\\") || SourceFilename.Contains("E:\\") || SourceFilename.Contains("F:\\") || SourceFilename.Contains("G:\\")) && File.Exists(SourceFilename))
+                if (IsLocal && File.Exists(SourceFilename))
                 {
                     QueuingJob_Local = (o, args) =>
                     {
@@ -71,13 +80,7 @@ namespace MeGUI
                 }
                 else
                 {
-                    QueuingJob_Remote = (o, args) =>
-                    {
-                        main.VideoEncodingComponent.PlayerClosed -= QueuingJob_Remote;
-                        RemoveVideoExtension(SourceFilename);
-                    };
-                    main.VideoEncodingComponent.PlayerClosed += QueuingJob_Remote;
-                    main.VideoEncodingComponent.ClosePlayer();
+                    RemoveVideoExtension(SourceFilename);
                 }
             }
         }

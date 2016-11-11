@@ -267,17 +267,20 @@ namespace MeGUI
 				    player.Close();
 				this.Close();
 
-                OpenScript(fileName, null);
+			    var cqJob = new CustomQueueJobEventArgs
+			    {
+			        Fps = fpsBox.Value,
+			        SourceFilename = sourceFilename,
+			        FilenameWithoutExtension = fileName.Replace(".avs", string.Empty),
+			        IsD2V = isD2vSource,
+			    };
+
+			    if (cqJob.IsLocal)
+			        OpenScript(fileName, null);
 
 			    if (QueuingJob != null)
 			    {
-			        QueuingJob(this, new CustomQueueJobEventArgs
-			        {
-                        Fps = fpsBox.Value,
-                        SourceFilename = sourceFilename,
-                        FilenameWithoutExtension = fileName.Replace(".avs", string.Empty),
-                        IsD2V = isD2vSource,
-                    });
+			        QueuingJob(this, cqJob);
 			    }
             }
 		}
