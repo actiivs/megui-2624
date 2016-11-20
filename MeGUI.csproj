@@ -492,6 +492,7 @@
     <Compile Include="packages\tools\avscreator\hjavSDAB_AviSynthWindow.Designer.cs">
       <DependentUpon>hjavSDAB_AviSynthWindow.cs</DependentUpon>
     </Compile>
+    <Compile Include="packages\tools\avscreator\MyAvisynthSetting.cs" />
     <Compile Include="packages\tools\avscreator\ThzBTCom_AviSynthWindow.cs">
       <SubType>Form</SubType>
     </Compile>

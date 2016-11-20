@@ -275,7 +275,7 @@ namespace MeGUI
 			        IsD2V = isD2vSource,
 			    };
 
-			    if (cqJob.IsLocal)
+			    if (cqJob.SourceFilename.IsLocal())
 			        OpenScript(fileName, null);
 
 			    if (QueuingJob != null)
@@ -405,7 +405,7 @@ namespace MeGUI
 
             indexFile = indexFileTemp;
 
-            if (videoInput.Contains("D:\\") || videoInput.Contains("E:\\"))
+            if (videoInput.IsLocal())
                 projectPath = mainForm.Settings.DefaultOutputDir;
 
             if (String.IsNullOrEmpty(indexFile))

@@ -368,7 +368,7 @@ namespace MeGUI
 
             indexFile = indexFileTemp;
 
-            if (videoInput.Contains("D:\\"))
+            if (videoInput.IsLocal())
                 projectPath = mainForm.Settings.DefaultOutputDir;
 
             if (String.IsNullOrEmpty(indexFile))

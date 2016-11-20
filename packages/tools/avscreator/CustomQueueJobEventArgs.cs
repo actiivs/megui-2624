@@ -7,15 +7,6 @@ namespace MeGUI
     {
         public bool IsD2V { get; set; }
 
-        public bool IsLocal
-        {
-            get
-            {
-                return SourceFilename.Contains("D:\\") || SourceFilename.Contains("E:\\") 
-                    || SourceFilename.Contains("F:\\") || SourceFilename.Contains("G:\\");
-            }
-        }
-
         public override void Execute(MainForm main)
         {
             if (IsD2V)
@@ -44,7 +35,7 @@ namespace MeGUI
             }
             else
             {
-                if (IsLocal && File.Exists(SourceFilename))
+                if (SourceFilename.IsLocal())
                 {
                     QueuingJob_Local = (o, args) =>
                     {

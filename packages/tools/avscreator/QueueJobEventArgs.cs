@@ -14,7 +14,7 @@ namespace MeGUI
 
         public virtual void Execute(MainForm main)
         {
-            if ((SourceFilename.Contains("D:\\") || SourceFilename.Contains("E:\\") || SourceFilename.Contains("F:\\") || SourceFilename.Contains("G:\\")) && File.Exists(SourceFilename))
+            if (SourceFilename.IsLocal())
             {
                 QueuingJob_Local = (o, args) =>
                 {
