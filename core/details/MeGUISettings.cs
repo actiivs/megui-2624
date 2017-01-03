@@ -550,6 +550,12 @@ namespace MeGUI
             set { alwaysbackupfiles = value; }
         }
 
+
+        public static string Dss2ModPath
+        {
+            get { return Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), @"tools\avisynth_plugin\avss.dll"); }
+        }
+
         /// <summary>
         /// Haali Media Splitter Path
         /// </summary>

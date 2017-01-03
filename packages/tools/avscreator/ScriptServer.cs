@@ -205,10 +205,9 @@ namespace MeGUI
                     }
                     else
                     {
-                        if (dss2 && File.Exists(Path.Combine(MeGUISettings.HaaliMSPath, "avss.dll")))
+                        if (dss2 && File.Exists(MeGUISettings.Dss2ModPath))
                         {
-                            //inputLine = "LoadPlugin(\"" + MeGUISettings.HaaliMSPath + "\\avss.dll" + "\")\r\ndss2(\"" + input + "\"" + ((fps > 0) ? ", fps=" + fps.ToString("F3", new CultureInfo("en-us")) : string.Empty) + ")" + VideoUtil.getAssumeFPS(fps, input);
-                            inputLine = "LoadPlugin(\"" + "E:\\Software\\Video Tool\\MeGUI_2624_x86\\tools\\avisynth_plugin" + "\\avss.dll" + "\")\r\ndss2(\"" + input + "\"" + ((fps > 0) ? ", fps=" + fps.ToString("F3", new CultureInfo("en-us")) : string.Empty) + ")" + VideoUtil.getAssumeFPS(fps, input);
+                            inputLine = "LoadPlugin(\"" + MeGUISettings.Dss2ModPath + "\")\r\ndss2(\"" + input + "\"" + ((fps > 0) ? ", fps=" + fps.ToString("F3", new CultureInfo("en-us")) : string.Empty) + ")" + VideoUtil.getAssumeFPS(fps, input);
                         }
                         else
                         {
