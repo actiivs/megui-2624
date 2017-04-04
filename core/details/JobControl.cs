@@ -312,7 +312,7 @@ namespace MeGUI.core.details
             {
                 var inputName = Path.GetFileNameWithoutExtension(job.InputFile);
                 var path = Path.GetDirectoryName(job.InputFile);
-
+                
                 foreach (var filePath in Directory.GetFiles(path, string.Format("{0}*", inputName)))
                 {
                     if(filePath.EndsWith(".mkv") || filePath.EndsWith(".wmv") || filePath.EndsWith(".mp4")) continue;
@@ -326,40 +326,31 @@ namespace MeGUI.core.details
                     }
                 }
 
-                foreach (var filePath in Directory.GetFiles("D:\\", string.Format("{0}*", inputName)))
-                {
-                    try
-                    {
-                        var oldName = Path.GetFileName(filePath);
-                        var oldDir = Path.GetDirectoryName(filePath);
-                        var newName = string.Format("!{0}", oldName);
-                        var newPath = Path.Combine(oldDir, newName);
-                        File.Move(filePath, newPath);
-                    }
-                    catch (Exception)
-                    {
-                        // ignored
-                    }
-                }
-
-                foreach (var filePath in Directory.GetFiles("E:\\", string.Format("{0}*", inputName)))
-                {
-                    try
-                    {
-                        var oldName = Path.GetFileName(filePath);
-                        var oldDir = Path.GetDirectoryName(filePath);
-                        var newName = string.Format("!{0}", oldName);
-                        var newPath = Path.Combine(oldDir, newName);
-                        File.Move(filePath, newPath);
-                    }
-                    catch (Exception)
-                    {
-                        // ignored
-                    }
-                }
+                TagSourceFile("D:\\", inputName);
+                TagSourceFile("E:\\", inputName);
+                TagSourceFile("F:\\", inputName);
             }
 
             reallyDeleteJob(job);
+        }
+
+        private void TagSourceFile(string diskRootPath, string fileName)
+        {
+            foreach (var filePath in Directory.GetFiles(diskRootPath, string.Format("{0}*", fileName)))
+            {
+                try
+                {
+                    var oldName = Path.GetFileName(filePath);
+                    var oldDir = Path.GetDirectoryName(filePath);
+                    var newName = string.Format("!{0}", oldName);
+                    var newPath = Path.Combine(oldDir, newName);
+                    File.Move(filePath, newPath);
+                }
+                catch (Exception)
+                {
+                    // ignored
+                }
+            }
         }
 
         private void reallyDeleteJob(TaggedJob job)

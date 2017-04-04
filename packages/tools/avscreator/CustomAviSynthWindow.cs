@@ -66,6 +66,8 @@ namespace MeGUI
             "[HD]",
             ".1080p",
             ".720p",
+            "[FHD60fps]",
+            "FHD_"
         };
 
         public static readonly List<string> UncensoredKeyword = new List<string>
@@ -78,6 +80,7 @@ namespace MeGUI
             "paco",
             "heyzo",
             "heydouga",
+            "pgm_",
         };
 
         #region construction/deconstruction
@@ -187,7 +190,7 @@ namespace MeGUI
         #region buttons
         private void input_FileSelected(FileBar sender, FileBarEventArgs args)
         {
-            isHdSource = HdSourceKeyword.Any(keyword => input.Filename.Contains(keyword));
+            isHdSource = HdSourceKeyword.Any(keyword => input.Filename.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0);
             isD2vSource = input.Filename.EndsWith(".d2v");
 
             if (isHdSource && UncensoredKeyword.All(u => !input.Filename.Contains(u)))
@@ -195,13 +198,19 @@ namespace MeGUI
                 var path = Path.GetDirectoryName(input.Filename);
                 var name = Path.GetFileNameWithoutExtension(input.Filename);
                 var ext = Path.GetExtension(input.Filename);
+
+                var newFilePath = input.Filename;
                 if (!FileUtil.IsAllLetterUpper(name))
                 {
                     var upperName = name.ToUpper();
-                    var newFilePath = Path.Combine(path, upperName + ext);
-                    File.Move(input.Filename, newFilePath);
-                    input.Filename = newFilePath;
+                    newFilePath = Path.Combine(path, upperName + ext);
                 }
+
+                newFilePath = newFilePath.Replace("60FPS", string.Empty);
+                newFilePath = newFilePath.Replace("MEOWISO_", string.Empty);
+                newFilePath = newFilePath.Replace("FHD_", "[FHD]");
+                File.Move(input.Filename, newFilePath);
+                input.Filename = newFilePath;
             }
 
             avsProfile.SelectProfile("AviSynth: *scratchpad*");

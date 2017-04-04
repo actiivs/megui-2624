@@ -170,13 +170,20 @@ namespace MeGUI
             var path = Path.GetDirectoryName(input.Filename);
             var name = Path.GetFileNameWithoutExtension(input.Filename);
             var ext = Path.GetExtension(input.Filename);
+
+            var newFilePath = input.Filename;
             if (!FileUtil.IsAllLetterUpper(name))
             {
                 var upperName = name.ToUpper();
-                var newFilePath = Path.Combine(path, upperName + ext);
-                File.Move(input.Filename, newFilePath);
-                input.Filename = newFilePath;
+                newFilePath = Path.Combine(path, upperName + ext);
             }
+
+            newFilePath = newFilePath.Replace("60FPS", string.Empty);
+            newFilePath = newFilePath.Replace("MEOWISO_", string.Empty);
+            newFilePath = newFilePath.Replace("FHD_", "[FHD]");
+            
+            File.Move(input.Filename, newFilePath);
+            input.Filename = newFilePath;
 
             scriptRefresh--;
             openVideoSource(input.Filename, null);
