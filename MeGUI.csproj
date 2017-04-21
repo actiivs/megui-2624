@@ -170,6 +170,7 @@
     </EmbeddedResource>
     <EmbeddedResource Include="App.ico" />
     <None Include="app.manifest" />
+    <None Include="avisynth_plugin_x64.zip" />
     <None Include="Changelog.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
