@@ -349,11 +349,19 @@ namespace MeGUI
             if (file != null && videoOutput != null)
             {
                 avisynthScript.Text = avisynthScript.Text.Insert(0,
+#if x64
+                    string.Format("Import(\"E:\\Software\\Video Tool\\MeGUI_2624_x64\\tools\\avisynth_plugin\\logoNR_v0.1.avsi\"){0}" +
+                    "LoadPlugin(\"E:\\Software\\Video Tool\\MeGUI_2624_x64\\tools\\avisynth_plugin\\masktools2.dll\"){0}" +
+                    "LoadPlugin(\"E:\\Software\\Video Tool\\MeGUI_2624_x64\\tools\\avisynth_plugin\\FFT3DFilter.dll\"){0}" +
+                    "LoadPlugin(\"E:\\Software\\Video Tool\\MeGUI_2624_x64\\tools\\avisynth_plugin\\xlogo.dll\"){0}" +
+                    "LoadPlugin(\"E:\\Software\\Video Tool\\MeGUI_2624_x64\\tools\\avisynth_plugin\\RemoveGrain.dll\"){0}", Environment.NewLine));
+#else
                     string.Format("Import(\"E:\\Software\\Video Tool\\MeGUI_2624_x86\\tools\\avisynth_plugin\\logoNR_v0.1.avsi\"){0}" +
                     "LoadPlugin(\"E:\\Software\\Video Tool\\MeGUI_2624_x86\\tools\\avisynth_plugin\\masktools2.dll\"){0}" +
                     "LoadPlugin(\"E:\\Software\\Video Tool\\MeGUI_2624_x86\\tools\\avisynth_plugin\\FFT3DFilter.dll\"){0}" +
                     "LoadPlugin(\"E:\\Software\\Video Tool\\MeGUI_2624_x86\\tools\\avisynth_plugin\\xlogo.dll\"){0}" +
                     "LoadPlugin(\"E:\\Software\\Video Tool\\MeGUI_2624_x86\\tools\\avisynth_plugin\\RemoveGrain.dll\"){0}", Environment.NewLine));
+#endif
 
                 var left = string.Format("left = last.LanczosResize(1280,720){1}res = xlogo(left, \"D:\\Data\\Logo\\Thz_x_1114_y_650_2.bmp\", X=1114, Y=650, alpha=0){1}logoNR(res, left, chroma=true, GPU=false, l=1114, t=650, r=0, b=0){1}{1}return last", file.VideoInfo.FrameCount - 3, Environment.NewLine);
                 avisynthScript.Text = avisynthScript.Text.Replace("#deinterlace", string.Format("{0}{1}", Environment.NewLine, left));

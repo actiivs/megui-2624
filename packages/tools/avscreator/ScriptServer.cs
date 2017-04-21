@@ -393,10 +393,10 @@ namespace MeGUI
 
         public static void AddYadif(FieldOrder order, List<DeinterlaceFilter> filters, bool bobber)
         {
-            string path = Path.Combine(MainForm.Instance.Settings.AvisynthPluginsPath, "yadif.dll");
+            string path = Path.Combine(MainForm.Instance.Settings.AvisynthPluginsPath, "yadifmod2.dll");
             filters.Add(new DeinterlaceFilter(
                 bobber ? "Yadif (with Bob)" : "Yadif",
-                string.Format("Load_Stdcall_Plugin(\"{0}\"){1}Yadif({2}order={3})", 
+                string.Format("LoadPlugin(\"{0}\"){1}Yadifmod2({2}order={3})",
                     path, Environment.NewLine,
                     bobber ? "mode=1, " : "", Order(order))));
         }
