@@ -181,7 +181,8 @@ namespace MeGUI
             newFilePath = newFilePath.Replace("60FPS", string.Empty);
             newFilePath = newFilePath.Replace("MEOWISO_", string.Empty);
             newFilePath = newFilePath.Replace("FHD_", "[FHD]");
-            
+            newFilePath = newFilePath.Replace("[FHD]-", "[FHD]");
+
             File.Move(input.Filename, newFilePath);
             input.Filename = newFilePath;
 
