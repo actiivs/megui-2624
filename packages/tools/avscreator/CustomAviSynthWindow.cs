@@ -67,6 +67,7 @@ namespace MeGUI
             ".1080p",
             ".720p",
             "[FHD60fps]",
+            "[FHDwmf]",
             "FHD_"
         };
 
@@ -210,7 +211,7 @@ namespace MeGUI
                 newFilePath = newFilePath.Replace("MEOWISO_", string.Empty);
                 newFilePath = newFilePath.Replace("FHD_", "[FHD]");
                 newFilePath = newFilePath.Replace("[FHD]-", "[FHD]");
-                newFilePath = newFilePath.Replace("[FHDwmf]", "[FHD]");
+                newFilePath = newFilePath.Replace("[FHDWMF]", "[FHD]");
                 File.Move(input.Filename, newFilePath);
                 input.Filename = newFilePath;
             }

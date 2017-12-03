@@ -364,7 +364,7 @@ namespace MeGUI
                     "LoadPlugin(\"E:\\Software\\Video Tool\\MeGUI_2624_x86\\tools\\avisynth_plugin\\RemoveGrain.dll\"){0}", Environment.NewLine));
 #endif
 
-                var left = string.Format("left = last.LanczosResize(1280,720){1}res = xlogo(left, \"G:\\Logo\\Thz_x_1114_y_650_2.bmp\", X=1114, Y=650, alpha=0){1}logoNR(res, left, chroma=true, GPU=false, l=1114, t=650, r=0, b=0){1}{1}return last", file.VideoInfo.FrameCount - 3, Environment.NewLine);
+                var left = string.Format("left = last.LanczosResize(1280,720){1}res = xlogo(left, \"G:\\Logo\\99Thz_x_1124_y_650_2.bmp\", X=1124, Y=650, alpha=0){1}logoNR(res, left, chroma=true, GPU=false, l=1124, t=650, r=0, b=0){1}{1}return last", file.VideoInfo.FrameCount - 3, Environment.NewLine);
                 avisynthScript.Text = avisynthScript.Text.Replace("#deinterlace", string.Format("{0}{1}", Environment.NewLine, left));
                 var cropIndex = avisynthScript.Text.IndexOf("#crop", 0, StringComparison.OrdinalIgnoreCase);
                 if(cropIndex > 0)
