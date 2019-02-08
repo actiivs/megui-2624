@@ -483,19 +483,25 @@
       <DependentUpon>TextViewer.cs</DependentUpon>
     </Compile>
     <Compile Include="packages\tools\avscreator\CustomQueueJobEventArgs.cs" />
-    <Compile Include="packages\tools\avscreator\hjavKAWD_AviSynthWindow.cs">
+    <Compile Include="packages\tools\avscreator\Hjd2048_AviSynthWindow.cs">
       <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="packages\tools\avscreator\hjavKAWD_AviSynthWindow.Designer.cs">
-      <DependentUpon>hjavKAWD_AviSynthWindow.cs</DependentUpon>
-    </Compile>
-    <Compile Include="packages\tools\avscreator\hjavSDAB_AviSynthWindow.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="packages\tools\avscreator\hjavSDAB_AviSynthWindow.Designer.cs">
-      <DependentUpon>hjavSDAB_AviSynthWindow.cs</DependentUpon>
     </Compile>
     <Compile Include="packages\tools\avscreator\MyAvisynthSetting.cs" />
+    <Compile Include="packages\tools\avscreator\Sehuatang1_AviSynthWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="packages\tools\avscreator\Sehuatang2_AviSynthWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="packages\tools\avscreator\Sehuatang_AviSynthWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="packages\tools\avscreator\ThzBTCom77_AviSynthWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="packages\tools\avscreator\ThzBTCom88_AviSynthWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="packages\tools\avscreator\ThzBTCom_AviSynthWindow.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -998,12 +1004,6 @@
     <EmbeddedResource Include="core\gui\TextViewer.resx">
       <SubType>Designer</SubType>
       <DependentUpon>TextViewer.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="packages\tools\avscreator\hjavKAWD_AviSynthWindow.resx">
-      <DependentUpon>hjavKAWD_AviSynthWindow.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="packages\tools\avscreator\hjavSDAB_AviSynthWindow.resx">
-      <DependentUpon>hjavSDAB_AviSynthWindow.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="packages\tools\avscreator\ThzBTCom_AviSynthWindow.resx">
       <DependentUpon>ThzBTCom_AviSynthWindow.cs</DependentUpon>

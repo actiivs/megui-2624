@@ -30,7 +30,13 @@ namespace MeGUI
                     var videoOutput = string.Format("{0}.264", FilenameWithoutExtension);
                     var audioOutput = main.AudioEncodingComponent.Tabs[0].AudioOutput;
                     var output = string.Format("{0}.mkv", FilenameWithoutExtension);
-                    mw.QueueMuxJob(videoOutput, audioOutput, output, Fps);
+                    mw.QueueMuxJob(new MuxJobConfig
+                    {
+                        VideoFilename = videoOutput,
+                        AudioFilename = audioOutput,
+                        OutputFilename = output,
+                        FrameRate = Fps
+                    });
                 }
             }
             else
@@ -40,7 +46,7 @@ namespace MeGUI
                     QueuingJob_Local = (o, args) =>
                     {
                         main.VideoEncodingComponent.PlayerClosed -= QueuingJob_Local;
-                        main.VideoEncodingComponent.SelectProfile("x264: Slow - 2000k");
+                        main.VideoEncodingComponent.SelectProfile("x264: Slow - 2200k");
                         main.VideoEncodingComponent.QueueJob();
 
                         string audioOutput = null;
@@ -64,7 +70,18 @@ namespace MeGUI
                             var mw = new MuxWindow(main.PackageSystem.MuxerProviders["mkvmerge"], main);
                             var videoOutput = string.Format("{0}.264", FilenameWithoutExtension);
                             var output = string.Format("{0}.mkv", FilenameWithoutExtension);
-                            mw.QueueMuxJob(videoOutput, audioOutput, output, Fps);
+
+                            var splitOptions = MyAvisynthSetting.SplitOptions
+                                .Where(s => this.OriginalSourceFilename.Contains(s.Key));
+
+                            mw.QueueMuxJob(new MuxJobConfig
+                            {
+                                VideoFilename = videoOutput,
+                                AudioFilename = audioOutput,
+                                OutputFilename = output,
+                                FrameRate = Fps,
+                                OptionsString = splitOptions.Any() ? splitOptions.First().Value : null
+                            });
                         }
                     };
                     main.VideoEncodingComponent.PlayerClosed += QueuingJob_Local;

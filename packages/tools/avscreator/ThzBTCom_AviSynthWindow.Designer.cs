@@ -1278,7 +1278,7 @@ namespace MeGUI
         private Label inputDARLabel;
         private Label tvTypeLabel;
         private SaveFileDialog saveAvisynthScriptDialog;
-        private TextBox avisynthScript;
+        protected TextBox avisynthScript;
         private NumericUpDown horizontalResolution;
         private NumericUpDown verticalResolution;
         private NumericUpDown cropLeft;
@@ -1320,8 +1320,8 @@ namespace MeGUI
         private CheckBox chAutoPreview;
         private GroupBox gbOutput;
         private Label label7;
-        private FileBar videoOutput;
-        private FileBar input;
+        protected FileBar videoOutput;
+	    protected FileBar input;
         private CheckBox onSaveLoadScript;
         private Button saveButton;
         private Button previewAvsButton;

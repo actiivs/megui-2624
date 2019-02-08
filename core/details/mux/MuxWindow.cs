@@ -239,16 +239,26 @@ namespace MeGUI
             fileUpdated();
         }
 
-        public void QueueMuxJob(string videoFilename, string audioFilename, string outputFilename, decimal framerate)
+        public void QueueMuxJob(MuxJobConfig config)
         {
-            vInput.Filename = videoFilename;
-            output.Filename = GetNormalizedOutputName(outputFilename);
-            audioTracks.First().input.Filename = audioFilename;
-            fps.Value = framerate;
-
+            vInput.Filename = config.VideoFilename;
+            output.Filename = GetNormalizedOutputName(config.OutputFilename);
+            audioTracks.First().input.Filename = config.AudioFilename;
+            fps.Value = config.FrameRate;
+                                                
             MuxJob job = this.Job;
+            job.OptionsString = config.OptionsString;
             mainForm.Jobs.addJobsToQueue(job);
             this.Close();
         }
+    }
+
+    public class MuxJobConfig
+    {
+        public string VideoFilename { get; set; }
+        public string AudioFilename { get; set; }
+        public string OutputFilename { get; set; }
+        public decimal FrameRate { get; set; }
+        public string OptionsString { get; set; }
     }
 }

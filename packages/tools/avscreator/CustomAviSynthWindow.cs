@@ -60,30 +60,8 @@ namespace MeGUI
 
         private bool isHdSource;
         private bool isD2vSource;
-        public static readonly List<string> HdSourceKeyword = new List<string>
-        {
-            "[FHD]",
-            "[HD]",
-            ".1080p",
-            ".720p",
-            "[FHD60fps]",
-            "[FHDwmf]",
-            "FHD_"
-        };
-
-        public static readonly List<string> UncensoredKeyword = new List<string>
-        {
-            "carib",
-            "1pon",
-            "mura",
-            "10mu",
-            "gachi",
-            "paco",
-            "heyzo",
-            "heydouga",
-            "pgm_",
-        };
-
+        private string originalFilename;
+        
         #region construction/deconstruction
         public CustomAviSynthWindow(MainForm mainForm)
         {
@@ -191,30 +169,11 @@ namespace MeGUI
         #region buttons
         private void input_FileSelected(FileBar sender, FileBarEventArgs args)
         {
-            isHdSource = HdSourceKeyword.Any(keyword => input.Filename.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0);
+            isHdSource = MyAvisynthSetting.IsHd(input.Filename);
             isD2vSource = input.Filename.EndsWith(".d2v");
 
-            if (isHdSource && UncensoredKeyword.All(u => !input.Filename.Contains(u)))
-            {
-                var path = Path.GetDirectoryName(input.Filename);
-                var name = Path.GetFileNameWithoutExtension(input.Filename);
-                var ext = Path.GetExtension(input.Filename);
-
-                var newFilePath = input.Filename;
-                if (!FileUtil.IsAllLetterUpper(name))
-                {
-                    var upperName = name.ToUpper();
-                    newFilePath = Path.Combine(path, upperName + ext);
-                }
-
-                newFilePath = newFilePath.Replace("60FPS", string.Empty);
-                newFilePath = newFilePath.Replace("MEOWISO_", string.Empty);
-                newFilePath = newFilePath.Replace("FHD_", "[FHD]");
-                newFilePath = newFilePath.Replace("[FHD]-", "[FHD]");
-                newFilePath = newFilePath.Replace("[FHDWMF]", "[FHD]");
-                File.Move(input.Filename, newFilePath);
-                input.Filename = newFilePath;
-            }
+            originalFilename = input.Filename;
+            input.Filename = MyAvisynthSetting.GetInputFilename(input.Filename);
 
             avsProfile.SelectProfile("AviSynth: *scratchpad*");
 
@@ -283,6 +242,7 @@ namespace MeGUI
 			    {
 			        Fps = fpsBox.Value,
 			        SourceFilename = sourceFilename,
+                    OriginalSourceFilename = originalFilename,
 			        FilenameWithoutExtension = fileName.Replace(".avs", string.Empty),
 			        IsD2V = isD2vSource,
 			    };
@@ -383,23 +343,13 @@ namespace MeGUI
             string oldScript = avisynthScript.Text;
             avisynthScript.Text = this.generateScript();
 
-            if (file != null && videoOutput != null && isHdSource)
+            if (file != null && videoOutput != null)
 		    {
-		        if ((int)file.VideoInfo.Width == 1920 && (int)file.VideoInfo.Height == 1080)
+		        if ((int)file.VideoInfo.Width == 1920)
 		        {
                     avisynthScript.Text = avisynthScript.Text.Replace("#resize", "LanczosResize(1280,720) # Lanczos (Sharp)");
 		        }
 		    }
-
-            if (file != null && videoOutput != null && isD2vSource)
-            {
-                if ((int) file.VideoInfo.Width == 720)
-                {
-                    avisynthScript.Text = avisynthScript.Text.Replace("LanczosResize(720,392) # Lanczos (Sharp)",
-                        "LanczosResize(720,400) # Lanczos (Sharp)");
-                }
-                avisynthScript.Text = avisynthScript.Text.Replace("#deinterlace", string.Format("Load_Stdcall_Plugin(\"E:\\Software\\Video Tool\\MeGUI_2624_x86\\tools\\avisynth_plugin\\yadif.dll\"){0}Yadif(order = -1)", Environment.NewLine));
-            }
 
             if (!oldScript.Equals(avisynthScript.Text))
                 chAutoPreview_CheckedChanged(null, null);

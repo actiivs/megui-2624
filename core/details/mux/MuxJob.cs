@@ -140,5 +140,7 @@ namespace MeGUI
 			get {return type;}
 			set {type = value;}
 		}
+
+        public string OptionsString { get; set; }
 	}
 }

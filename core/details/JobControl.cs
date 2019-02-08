@@ -327,7 +327,8 @@ namespace MeGUI.core.details
                 }
 
                 TagSourceFile("D:\\", inputName);
-                TagSourceFile("E:\\", inputName);
+	            TagSourceFile("D:\\Downloads\\", inputName);
+				TagSourceFile("E:\\", inputName);
                 TagSourceFile("F:\\", inputName);
             }
 

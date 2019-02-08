@@ -42,7 +42,7 @@ namespace MeGUI
         private bool isPreviewMode = false;
         private bool eventsOn = true;
 		private VideoPlayer player;
-        private IMediaFile file;
+		protected IMediaFile file;
         private IVideoReader reader;
 		private StringBuilder script;
 		public event OpenScriptCallback OpenScript;
@@ -51,7 +51,7 @@ namespace MeGUI
         private PossibleSources sourceType;
         private SourceDetector detector;
         private string indexFile;
-        private int scriptRefresh = 1; // >= 1 enabled; < 1 disabled
+        protected int scriptRefresh = 1; // >= 1 enabled; < 1 disabled
         private bool bAllowUpsizing;
         private LogItem _oLog;
 		#endregion
@@ -167,24 +167,7 @@ namespace MeGUI
         {
             avsProfile.SelectProfile("AviSynth: *scratchpad*");
             
-            var path = Path.GetDirectoryName(input.Filename);
-            var name = Path.GetFileNameWithoutExtension(input.Filename);
-            var ext = Path.GetExtension(input.Filename);
-
-            var newFilePath = input.Filename;
-            if (!FileUtil.IsAllLetterUpper(name))
-            {
-                var upperName = name.ToUpper();
-                newFilePath = Path.Combine(path, upperName + ext);
-            }
-
-            newFilePath = newFilePath.Replace("60FPS", string.Empty);
-            newFilePath = newFilePath.Replace("MEOWISO_", string.Empty);
-            newFilePath = newFilePath.Replace("FHD_", "[FHD]");
-            newFilePath = newFilePath.Replace("[FHD]-", "[FHD]");
-
-            File.Move(input.Filename, newFilePath);
-            input.Filename = newFilePath;
+            input.Filename = MyAvisynthSetting.GetInputFilename(input.Filename);
 
             scriptRefresh--;
             openVideoSource(input.Filename, null);
@@ -264,7 +247,7 @@ namespace MeGUI
         #endregion
 
 		#region script generation
-		private string generateScript()
+		protected string generateScript()
 		{
 			script = new StringBuilder();
             //scriptLoad = new StringBuilder(); Better to use AviSynth plugin dir and it is easier for avs templates/profiles
@@ -337,7 +320,7 @@ namespace MeGUI
             return (AviSynthSettings)avsProfile.SelectedProfile.BaseSettings;
         }
 
-		private void showScript(bool bForce)
+		protected virtual void showScript(bool bForce)
 		{
             if (bForce)
                 scriptRefresh++;
@@ -351,20 +334,20 @@ namespace MeGUI
             {
                 avisynthScript.Text = avisynthScript.Text.Insert(0,
 #if x64
-                    string.Format("Import(\"E:\\Software\\Video Tool\\MeGUI_2624_x64\\tools\\avisynth_plugin\\logoNR_v0.1.avsi\"){0}" +
+                    string.Format(
                     "LoadPlugin(\"E:\\Software\\Video Tool\\MeGUI_2624_x64\\tools\\avisynth_plugin\\masktools2.dll\"){0}" +
                     "LoadPlugin(\"E:\\Software\\Video Tool\\MeGUI_2624_x64\\tools\\avisynth_plugin\\FFT3DFilter.dll\"){0}" +
                     "LoadPlugin(\"E:\\Software\\Video Tool\\MeGUI_2624_x64\\tools\\avisynth_plugin\\xlogo.dll\"){0}" +
                     "LoadPlugin(\"E:\\Software\\Video Tool\\MeGUI_2624_x64\\tools\\avisynth_plugin\\RemoveGrain.dll\"){0}", Environment.NewLine));
 #else
-                    string.Format("Import(\"E:\\Software\\Video Tool\\MeGUI_2624_x86\\tools\\avisynth_plugin\\logoNR_v0.1.avsi\"){0}" +
+                    string.Format(
                     "LoadPlugin(\"E:\\Software\\Video Tool\\MeGUI_2624_x86\\tools\\avisynth_plugin\\masktools2.dll\"){0}" +
                     "LoadPlugin(\"E:\\Software\\Video Tool\\MeGUI_2624_x86\\tools\\avisynth_plugin\\FFT3DFilter.dll\"){0}" +
                     "LoadPlugin(\"E:\\Software\\Video Tool\\MeGUI_2624_x86\\tools\\avisynth_plugin\\xlogo.dll\"){0}" +
                     "LoadPlugin(\"E:\\Software\\Video Tool\\MeGUI_2624_x86\\tools\\avisynth_plugin\\RemoveGrain.dll\"){0}", Environment.NewLine));
 #endif
 
-                var left = string.Format("left = last.LanczosResize(1280,720){1}res = xlogo(left, \"G:\\Logo\\99Thz_x_1124_y_650_2.bmp\", X=1124, Y=650, alpha=0){1}logoNR(res, left, chroma=true, GPU=false, l=1124, t=650, r=0, b=0){1}{1}return last", file.VideoInfo.FrameCount - 3, Environment.NewLine);
+                var left = string.Format("left = last.LanczosResize(1280,720){1}res = xlogo(left, \"G:\\Logo\\99Thz_x_1124_y_650_2.bmp\", X=1124, Y=650, alpha=0){1}{1}return res", file.VideoInfo.FrameCount - 3, Environment.NewLine);
                 avisynthScript.Text = avisynthScript.Text.Replace("#deinterlace", string.Format("{0}{1}", Environment.NewLine, left));
                 var cropIndex = avisynthScript.Text.IndexOf("#crop", 0, StringComparison.OrdinalIgnoreCase);
                 if(cropIndex > 0)
@@ -1183,7 +1166,7 @@ namespace MeGUI
             reopenOriginal.Text = "Re-open original video player";
         }
 
-        private void chAutoPreview_CheckedChanged(object sender, EventArgs e)
+		protected void chAutoPreview_CheckedChanged(object sender, EventArgs e)
         {
             if (chAutoPreview.Checked)
                 previewButton_Click(null, null);
@@ -1508,7 +1491,7 @@ namespace MeGUI
 
         public Shortcut[] Shortcuts
         {
-            get { return new Shortcut[] { Shortcut.Alt2 }; }
+            get { return new Shortcut[] { Shortcut.Alt2, Shortcut.Alt3 }; }
         }
 
         #endregion

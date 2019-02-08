@@ -34,6 +34,7 @@ using MeGUI.core.details;
 using MeGUI.core.gui;
 using MeGUI.core.plugins.interfaces;
 using MeGUI.core.util;
+using MeGUI.packages.tools.avscreator;
 using Utils.MessageBoxExLib;
 using Action = System.Action;
 
@@ -971,8 +972,11 @@ namespace MeGUI
             PackageSystem.Tools.Register(new AviSynthWindowTool());
             PackageSystem.Tools.Register(new CustomAviSynthWindowTool());
             PackageSystem.Tools.Register(new ThzBTCom_AviSynthWindowTool());
-            PackageSystem.Tools.Register(new hjavSDAB_AviSynthWindowTool());
-            PackageSystem.Tools.Register(new hjavKAWD_AviSynthWindowTool());
+	        PackageSystem.Tools.Register(new ThzBTCom88_AviSynthWindowTool());
+            PackageSystem.Tools.Register(new ThzBTCom77_AviSynthWindowTool());
+            PackageSystem.Tools.Register(new Sehuatang_AviSynthWindowTool());
+	        PackageSystem.Tools.Register(new Sehuatang1_AviSynthWindowTool());
+			PackageSystem.Tools.Register(new Hjd2048_AviSynthWindowTool());
             PackageSystem.Tools.Register(new AutoEncodeTool());
             PackageSystem.Tools.Register(new CQMEditorTool());
             PackageSystem.Tools.Register(new CalculatorTool());

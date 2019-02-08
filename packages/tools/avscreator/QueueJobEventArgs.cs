@@ -11,6 +11,7 @@ namespace MeGUI
         public decimal Fps { get; set; }
         public string FilenameWithoutExtension { get; set; }
         public string SourceFilename { get; set; }
+        public string OriginalSourceFilename { get; set; }
 
         public virtual void Execute(MainForm main)
         {
@@ -19,14 +20,20 @@ namespace MeGUI
                 QueuingJob_Local = (o, args) =>
                 {
                     main.VideoEncodingComponent.PlayerClosed -= QueuingJob_Local;
-                    main.VideoEncodingComponent.SelectProfile("x264: Slow - 2000k");
+                    main.VideoEncodingComponent.SelectProfile("x264: Slow - 2200k");
                     main.VideoEncodingComponent.QueueJob();
 
                     var mw = new MuxWindow(main.PackageSystem.MuxerProviders["mkvmerge"], main);
                     var videoOutput = string.Format("{0}.264", FilenameWithoutExtension);
                     var audioOutput = SourceFilename;
                     var output = string.Format("{0}.mkv", FilenameWithoutExtension);
-                    mw.QueueMuxJob(videoOutput, audioOutput, output, Fps);
+                    mw.QueueMuxJob(new MuxJobConfig
+                    {
+                        VideoFilename = videoOutput,
+                        AudioFilename = audioOutput,
+                        OutputFilename = output,
+                        FrameRate = Fps
+                    });
                 };
                 main.VideoEncodingComponent.PlayerClosed += QueuingJob_Local;
             }
